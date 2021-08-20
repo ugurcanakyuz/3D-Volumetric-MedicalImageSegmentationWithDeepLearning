@@ -1,0 +1,20 @@
+Keywords: "newborn", "neonatal", "infant"; "thermal", "thermogram",; "image", "video", "dataset"
+
+infant thermal image
+infant thermal video
+infant thermal dataset
+infant thermogram image
+infant thermogram video
+infant thermogram dataset
+newborn thermal image
+newborn thermal video
+newborn thermal dataset
+newborn thermogram image
+newborn thermogram video
+newborn thermogram dataset
+neonatal thermal image
+neonatal thermal video
+neonatal thermal dataset
+neonatal thermogram image
+neonatal thermogram video
+neonatal thermogram dataset
