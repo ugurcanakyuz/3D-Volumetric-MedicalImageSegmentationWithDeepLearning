@@ -43,6 +43,7 @@ class UNet3D(nn.Module):
         return conv
 
 if __name__ == "__main__":
+    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     image = torch.rand((1, 3, 256, 256, 256))
     model = UNet3D()
     print(model(image))
