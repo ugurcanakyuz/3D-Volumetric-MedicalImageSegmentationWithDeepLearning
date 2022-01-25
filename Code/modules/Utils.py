@@ -1,6 +1,6 @@
 def create_patch_indexes(patch_counts, image_shape):
     px, py, pz = patch_counts
-    x, y, z = image_size
+    x, y, z = image_shape
     ps_x, ps_y, ps_z = int(x / px), int(y / py), int(z / pz)  # patch sizes of each dimension
 
     sx, sy, sz = 0, 0, 0  # starting points
