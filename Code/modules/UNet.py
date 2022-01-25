@@ -102,7 +102,7 @@ class UNet2D(nn.Module):
 
 class UNet3D(nn.Module):
     # Implemented from https://arxiv.org/pdf/1606.06650.pdf.
-    def __init__(self):
+    def __init__(self, n_classes=8):
         super(UNet3D, self).__init__()
         self.pad = (1, 1, 1, 1, 1, 1)
 
@@ -123,7 +123,7 @@ class UNet3D(nn.Module):
         self.up_trans3 = nn.ConvTranspose3d(128, 128, kernel_size=2, stride=2)
         self.up_conv5 = self.__conv3d(in_channels=192, out_channels=64)
         self.up_conv6 = self.__conv3d(in_channels=64, out_channels=64)
-        self.out = nn.Conv3d(in_channels=64, out_channels=8, kernel_size=1)
+        self.out = nn.Conv3d(in_channels=64, out_channels=n_classes, kernel_size=1)
 
     def forward(self, image):
         # bs, c, d, h, w
@@ -146,7 +146,7 @@ class UNet3D(nn.Module):
         x = self.up_trans3(x)
         x = F.relu(self.up_conv5(torch.cat([x1, x], 1)))
         x = F.relu(self.up_conv6(x))
-        x = F.relu(self.out(x))
+        x = F.softmax(self.out(x))
 
         return x
 
