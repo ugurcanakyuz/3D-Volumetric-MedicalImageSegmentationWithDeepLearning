@@ -146,7 +146,7 @@ class UNet3D(nn.Module):
         x = self.up_trans3(x)
         x = F.relu(self.up_conv5(torch.cat([x1, x], 1)))
         x = F.relu(self.up_conv6(x))
-        x = F.softmax(self.out(x))
+        x = F.softmax(self.out(x), dim=2) #ToDo: Be sure if the dim parameter is correct.
 
         return x
 
