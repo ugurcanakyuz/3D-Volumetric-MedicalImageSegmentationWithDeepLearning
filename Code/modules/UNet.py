@@ -153,8 +153,10 @@ class UNet3D(nn.Module):
     def __double_down_conv(self, in_channels, out_channels):
         conv = nn.Sequential(
             nn.Conv3d(in_channels, out_channels // 2, kernel_size=3, padding="same", padding_mode="zeros"),
+            #nn.GroupNorm(4, out_channels // 2),
             nn.ReLU(inplace=True),
             nn.Conv3d(out_channels // 2, out_channels, kernel_size=3, padding="same", padding_mode="zeros"),
+            #nn.GroupNorm(4, out_channels),
             nn.ReLU(inplace=True)
         )
 
