@@ -42,7 +42,7 @@ class FeTADataSet(Dataset):
         """"""
         reconstruction = ""
 
-        if index < 40 and self.train == True:
+        if index < 40 and self.train:
             reconstruction = "_rec-mial"
         else:
             reconstruction = "_rec-irtk"
