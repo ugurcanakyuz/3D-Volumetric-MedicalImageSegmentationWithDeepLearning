@@ -1,9 +1,26 @@
 import glob
 
-def create_patch_indexes(patch_counts, image_shape):
-    px, py, pz = patch_counts
+
+def create_patch_indexes(image_shape, patch_sizes):
+    """Creates image patch coordinates for 3D dimension. Image dimensions must be divisible by patch size without
+    remainder.
+
+    Parameters
+    ----------
+    image_shape: tuple
+    patch_sizes: tuple
+
+    Returns
+    -------
+    patches: list
+    """
+
     x, y, z = image_shape
-    ps_x, ps_y, ps_z = int(x / px), int(y / py), int(z / pz)  # patch sizes of each dimension
+    ps_x, ps_y, ps_z = patch_sizes
+    assert x % ps_x == 0, "First dimension of the image must be divisible by patch size without remainder."
+    assert y % ps_y == 0, "Second dimension of the image must be divisible by patch size without remainder."
+    assert z % ps_z == 0, "Third dimension of the image must be divisible by patch size without remainder."
+    px, py, pz = int(x / ps_x), int(y / ps_y), int(z / ps_z)
 
     sx, sy, sz = 0, 0, 0  # starting points
 
