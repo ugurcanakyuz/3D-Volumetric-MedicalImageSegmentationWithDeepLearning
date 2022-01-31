@@ -2,10 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class UNet2D(nn.Module):
     # Implemented from https://arxiv.org/pdf/1505.04597.pdf
     def __init__(self):
-        super(UNet, self).__init__()
+        super(UNet2D, self).__init__()
 
         self.max_pool_2x2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.down_conv_1 = self.__double_conv2d(1, 64)
@@ -81,7 +82,7 @@ class UNet2D(nn.Module):
 
         return x
 
-    def __double_conv2d(in_c, out_c):
+    def __double_conv2d(self, in_c, out_c):
         conv = nn.Sequential(
             nn.Conv2d(in_c, out_c, kernel_size=3),
             nn.ReLU(inplace=True),
@@ -146,17 +147,17 @@ class UNet3D(nn.Module):
         x = self.up_trans3(x)
         x = F.relu(self.up_conv5(torch.cat([x1, x], 1)))
         x = F.relu(self.up_conv6(x))
-        x = F.softmax(self.out(x), dim=2) #ToDo: Be sure if the dim parameter is correct.
+        x = F.softmax(self.out(x), dim=3)  # ToDo: Be sure if the dim parameter is correct.
 
         return x
 
     def __double_down_conv(self, in_channels, out_channels):
         conv = nn.Sequential(
             nn.Conv3d(in_channels, out_channels // 2, kernel_size=3, padding="same", padding_mode="zeros"),
-            #nn.GroupNorm(4, out_channels // 2),
+            # nn.GroupNorm(4, out_channels // 2),
             nn.ReLU(inplace=True),
             nn.Conv3d(out_channels // 2, out_channels, kernel_size=3, padding="same", padding_mode="zeros"),
-            #nn.GroupNorm(4, out_channels),
+            # nn.GroupNorm(4, out_channels),
             nn.ReLU(inplace=True)
         )
 
