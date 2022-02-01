@@ -53,7 +53,7 @@ def get_file_names(path_data):
         {'sub_name': [image_name, mask_name]}
     """
 
-    files = glob.glob(path_data + "**/*.nii.gz", recursive=True)
+    files = glob.glob(path_data + "/**/*.nii.gz", recursive=True)
     files = sorted(files)
 
     def pairwise(files):

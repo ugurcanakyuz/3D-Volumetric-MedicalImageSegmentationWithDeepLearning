@@ -2,19 +2,22 @@ import os
 
 import nibabel as nib
 import pandas as pd
-
 from torch.utils.data import Dataset
+
+from modules.Utils import get_file_names
 
 
 class FeTADataSet(Dataset):
     # def __init__(self, quality=[], labels=[], pathologies=[], load_3d=None):
     def __init__(self, path="feta_2.1", train=True, pathology="all"):
         """"""
-        self.path_base = path
-        self.train = train
 
-        self.meta_data = pd.read_csv(os.path.join(self.path_base, "participants.tsv"), sep="\t")
         count_train = 70  # First 70 MRI image consist of 40 Pathological and 20 Neurotypical.
+        self.__path_base = path
+        self.__train = train
+
+        self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
+        self.__paths_file = get_file_names(self.__path_base)
 
         # Images below might have bad qualities
         # self.meta_data = self.meta_data.drop(index=self.meta_data[
@@ -30,32 +33,18 @@ class FeTADataSet(Dataset):
             self.meta_data = self.meta_data[self.meta_data.Pathology == "Neurotypical"]
         else:
             # Return data for training or test.
-            if self.train:
+            if self.__train:
                 self.meta_data = self.meta_data[:count_train]
             else:
                 self.meta_data = self.meta_data[count_train:]
                 self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
 
-        self.n_samples = self.meta_data.shape[0]
 
     def __getitem__(self, index):
         """"""
-        reconstruction = ""
 
-        if index < 40 and self.train:
-            reconstruction = "_rec-mial"
-        else:
-            reconstruction = "_rec-irtk"
-
-        path_image = os.path.join(self.path_base,
-                                  self.meta_data.participant_id[index],
-                                  "anat",
-                                  self.meta_data.participant_id[index] + reconstruction + "_T2w.nii.gz")
-
-        path_mask = os.path.join(self.path_base,
-                                 self.meta_data.participant_id[index],
-                                 "anat",
-                                 self.meta_data.participant_id[index] + reconstruction + "_dseg.nii.gz")
+        data = self.__paths_file[self.meta_data.participant_id[index]]
+        path_image, path_mask = data[0], data[1]
 
         mri_image = nib.load(path_image).get_fdata()
         mri_mask = nib.load(path_mask).get_fdata()
@@ -63,4 +52,4 @@ class FeTADataSet(Dataset):
         return mri_image, mri_mask
 
     def __len__(self):
-        return self.n_samples
+        return self.meta_data.shape[0]
