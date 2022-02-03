@@ -1,4 +1,5 @@
 import glob
+import torch
 
 
 def create_patch_indexes(image_shape, patch_sizes):
@@ -67,3 +68,26 @@ def get_file_names(path_data):
         paths[image.split('/')[1]] = [image, mask]
 
     return paths
+
+
+def create_onehot_mask(pred_size, mask):
+    """Creates onehot mask for multidimensional mask.
+
+    Parameters
+    ----------
+    pred_size: tuple
+        [bs,number_of_classes,x,y,z]
+    mask: torch.tensor
+        [bs,1,x,y,z]
+
+    Returns
+    -------
+    mask_onehot: torch.tensor
+        [bs,number_of_classes,x,y,z]
+    """
+
+    mask_onehot = torch.zeros(pred_size)
+    mask = mask.long()
+    mask_onehot.scatter_(1, mask, 1)
+
+    return mask_onehot
