@@ -120,16 +120,14 @@ class UNet3D(nn.Module):
         self.down_conv4 = self.__double_down_conv(256, 512)
 
         self.up_trans1 = nn.ConvTranspose3d(512, 512, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv1 = self.__conv3d(in_channels=768, out_channels=256)
-        self.up_conv2 = self.__conv3d(in_channels=256, out_channels=256)
+        self.up_conv1 = self.__double_up_conv(in_channels=768, out_channels=256)
 
         self.up_trans2 = nn.ConvTranspose3d(256, 256, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv3 = self.__conv3d(in_channels=384, out_channels=128)
-        self.up_conv4 = self.__conv3d(in_channels=128, out_channels=128)
+        self.up_conv2 = self.__double_up_conv(in_channels=384, out_channels=128)
 
         self.up_trans3 = nn.ConvTranspose3d(128, 128, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv5 = self.__conv3d(in_channels=192, out_channels=64)
-        self.up_conv6 = self.__conv3d(in_channels=64, out_channels=64)
+        self.up_conv3 = self.__double_up_conv(in_channels=192, out_channels=64)
+
         self.out = nn.Conv3d(in_channels=64, out_channels=n_classes, kernel_size=(1, 1, 1))
 
     def forward(self, image):
@@ -146,15 +144,16 @@ class UNet3D(nn.Module):
 
         # decoder
         x = self.up_trans1(x7)
-        x = F.relu(self.up_conv1(torch.cat([x5, x], 1)))
-        x = F.relu(self.up_conv2(x))
+        x = torch.cat([x5, x], 1)
+        x = self.up_conv1(x)
         x = self.up_trans2(x)
-        x = F.relu(self.up_conv3(torch.cat([x3, x], 1)))
-        x = F.relu(self.up_conv4(x))
+        x = torch.cat([x3, x], 1)
+        x = self.up_conv2(x)
         x = self.up_trans3(x)
-        x = F.relu(self.up_conv5(torch.cat([x1, x], 1)))
-        x = F.relu(self.up_conv6(x))
-        x = F.softmax(self.out(x), dim=1)  # ToDo: Be sure if the dim parameter is correct.
+        x = torch.cat([x1, x], 1)
+        x = self.up_conv3(x)
+        x = self.out(x)
+        x = F.softmax(x, dim=1)  # ToDo: Be sure if the dim parameter is correct.
 
         return x
 
@@ -162,27 +161,24 @@ class UNet3D(nn.Module):
     def __double_down_conv(in_channels, out_channels, kernel_size_=(3, 3, 3)):
         conv = nn.Sequential(
             nn.Conv3d(in_channels, out_channels // 2, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
-            # nn.GroupNorm(4, out_channels // 2),
+            nn.GroupNorm(4, out_channels // 2),
             nn.ReLU(inplace=True),
             nn.Conv3d(out_channels // 2, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
-            # nn.GroupNorm(4, out_channels),
+            nn.GroupNorm(4, out_channels),
             nn.ReLU(inplace=True)
         )
 
         return conv
 
     @staticmethod
-    def __conv3d(in_channels, out_channels, kernel_size_=(3, 3, 3)):
-        return nn.Conv3d(in_channels, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros")
+    def __double_up_conv(in_channels, out_channels, kernel_size_=(2, 2, 2)):
+        conv = nn.Sequential(
+            nn.Conv3d(in_channels, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
+            nn.GroupNorm(4, out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv3d(out_channels, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
+            nn.GroupNorm(4, out_channels),
+            nn.ReLU(inplace=True)
+        )
 
-    # def __crop_img3d(self, tensor, target_tensor):
-    #    target_size = target_tensor.size()[2]
-    #    tensor_size = tensor.size()[2]
-    #    delta = tensor_size - target_size
-#
-#    if delta%2==0:
-#        delta = delta//2
-#        return tensor[:, :, delta:tensor_size-delta, delta:tensor_size-delta, delta:tensor_size-delta]
-#    else:
-#        delta = delta//2
-#        return tensor[:, :, delta:tensor_size-delta-1, delta:tensor_size-delta-1, delta:tensor_size-delta-1]
+        return conv
