@@ -171,7 +171,7 @@ class UNet3D(nn.Module):
         return conv
 
     @staticmethod
-    def __double_up_conv(in_channels, out_channels, kernel_size_=(2, 2, 2)):
+    def __double_up_conv(in_channels, out_channels, kernel_size_=(3, 3, 3)):
         conv = nn.Sequential(
             nn.Conv3d(in_channels, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             nn.GroupNorm(4, out_channels),
