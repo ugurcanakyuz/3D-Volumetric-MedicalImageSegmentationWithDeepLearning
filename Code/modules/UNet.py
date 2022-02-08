@@ -7,8 +7,8 @@ class UNet2D(nn.Module):
     # Implemented from https://arxiv.org/pdf/1505.04597.pdf
     def __init__(self):
         super(UNet2D, self).__init__()
-        kernel_size_ = (2, 2, 2)
-        stride_ = (2, 2, 2)
+        kernel_size_ = 2
+        stride_ = 2
 
         self.max_pool_2x2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.down_conv_1 = self.__double_conv2d(1, 64)
@@ -48,7 +48,7 @@ class UNet2D(nn.Module):
         self.out = nn.Conv2d(
             in_channels=64,
             out_channels=8,
-            kernel_size=(1, 1, 1,)
+            kernel_size=(1, 1)
         )
 
     def forward(self, image):
@@ -65,31 +65,31 @@ class UNet2D(nn.Module):
 
         # decoder
         x = self.up_trans_1(x9)
-        y = self.__crop_img2d(x7, x)
-        x = self.up_conv_1(torch.cat([y, x], 1))
+        #y = self.__crop_img2d(x7, x)
+        x = self.up_conv_1(torch.cat([x7, x], 1))
 
         x = self.up_trans_2(x)
-        y = self.__crop_img2d(x5, x)
-        x = self.up_conv_2(torch.cat([y, x], 1))
+        #y = self.__crop_img2d(x5, x)
+        x = self.up_conv_2(torch.cat([x5, x], 1))
 
         x = self.up_trans_3(x)
-        y = self.__crop_img2d(x3, x)
-        x = self.up_conv_3(torch.cat([y, x], 1))
+        #y = self.__crop_img2d(x3, x)
+        x = self.up_conv_3(torch.cat([x3, x], 1))
 
         x = self.up_trans_4(x)
-        y = self.__crop_img2d(x1, x)
-        x = self.up_conv_4(torch.cat([y, x], 1))
+        #y = self.__crop_img2d(x1, x)
+        x = self.up_conv_4(torch.cat([x1, x], 1))
 
         x = self.out(x)
 
         return x
 
     @staticmethod
-    def __double_conv2d(in_c, out_c, kernel_size_=(3, 3, 3)):
+    def __double_conv2d(in_c, out_c, kernel_size_=(3, 3)):
         conv = nn.Sequential(
-            nn.Conv2d(in_c, out_c, kernel_size=kernel_size_),
+            nn.Conv2d(in_c, out_c, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             nn.ReLU(inplace=True),
-            nn.Conv2d(out_c, out_c, kernel_size=kernel_size_),
+            nn.Conv2d(out_c, out_c, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             nn.ReLU(inplace=True),
         )
 
