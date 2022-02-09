@@ -70,15 +70,19 @@ def get_file_names(path_data):
     return paths
 
 
-def create_onehot_mask(pred_size, mask, device):
+def create_onehot_mask(pred_shape, mask, device):
     """Creates onehot mask for multidimensional mask.
 
     Parameters
     ----------
-    pred_size: tuple
-        [bs,number_of_classes,x,y,z]
+    pred_shape: tuple
+        (bs,number_of_classes,x,y)
+                    or
+        (bs,number_of_classes,x,y,z)
     mask: torch.tensor
-        [bs,1,x,y,z]
+        (bs,1,x,y)
+            or
+        (bs,1,x,y,z)
     device: str
         'cuda' or 'cpu'...
     Returns
@@ -87,7 +91,7 @@ def create_onehot_mask(pred_size, mask, device):
         [bs,number_of_classes,x,y,z]
     """
 
-    mask_onehot = torch.zeros(pred_size).to(device)
+    mask_onehot = torch.zeros(pred_shape).to(device)
     mask = mask.long()
     mask_onehot.scatter_(1, mask, 1)
 
