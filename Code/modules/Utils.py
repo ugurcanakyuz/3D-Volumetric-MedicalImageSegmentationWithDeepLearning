@@ -96,3 +96,19 @@ def create_onehot_mask(pred_shape, mask, device):
     mask_onehot.scatter_(1, mask, 1)
 
     return mask_onehot
+
+
+def normal_weight_init(m):
+    """Initialize model weights with uniform distribution.
+
+    Parameters
+    ----------
+    m: torch.model
+
+    Returns
+    -------
+    None
+    """
+
+    if isinstance(m, torch.nn.Conv2d):
+        torch.nn.init.xavier_uniform_(m.weight)

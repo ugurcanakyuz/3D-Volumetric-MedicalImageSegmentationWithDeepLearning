@@ -172,8 +172,12 @@ class UNet2Dv2(nn.Module):
     def __double_conv2d(in_c, out_c, kernel_size_=(3, 3)):
         conv = nn.Sequential(
             nn.Conv2d(in_c, out_c, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
+            nn.BatchNorm2d(out_c),
+            #nn.GroupNorm(4, out_c),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_c, out_c, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
+            nn.BatchNorm2d(out_c),
+            #nn.GroupNorm(4, out_c),
             nn.ReLU(inplace=True),
         )
 
