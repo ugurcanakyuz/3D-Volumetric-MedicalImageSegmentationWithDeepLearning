@@ -120,7 +120,7 @@ def init_weights_kaiming(m):
         m.bias.data.fill_(0)
 
 
-def calculate_dice_score(pred, mask):
+def calculate_dice_score(pred, mask, smooth=1e-5):
     """This method calculates the dice score for each given class.
 
     Parameters
@@ -147,7 +147,7 @@ def calculate_dice_score(pred, mask):
     intersection = (pred * mask).sum(-1)
     denominator = (pred + mask).sum(-1)
 
-    dice_scores = (2 * intersection) / denominator
+    dice_scores = (2 * intersection.clamp(min=smooth)) / denominator.clamp(min=smooth)
 
     return dice_scores
 
