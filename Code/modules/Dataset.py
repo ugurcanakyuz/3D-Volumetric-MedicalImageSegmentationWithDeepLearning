@@ -41,23 +41,49 @@ class FeTADataSet(Dataset):
                 self.meta_data = self.meta_data[count_train:]
                 self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
 
-
-    def __getitem__(self, index):
-        """"""
-
-        data = self.__paths_file[self.meta_data.participant_id[index]]
+    def __get_data(self, sub_id):
+        data = self.__paths_file[sub_id]
         path_image, path_mask = data[0], data[1]
 
         mri_image = nib.load(path_image).get_fdata()
-        mri_mask = nib.load(path_mask).get_fdata()
+        mri_image = torch.Tensor(mri_image)
 
-        if self.__transform:
-            mri_image = torch.tensor(mri_image)
-            mri_image = mri_image.view(1, 256, 256, 256)
-            mri_image = self.__transform(mri_image)
-            mri_image = mri_image.view(256, 256, 256)
+        mri_mask = nib.load(path_mask).get_fdata()
+        mri_mask = torch.Tensor(mri_mask)
 
         return mri_image, mri_mask
+
+    def __getitem__(self, index):
+        """"""
+        if isinstance(index, int):
+            sub_id = self.meta_data.participant_id[index]
+            mri_image, mri_mask = self.__get_data(sub_id)
+
+            if self.__transform:
+                mri_image = mri_image.view(1, 256, 256, 256)
+                mri_image = self.__transform(mri_image)
+                mri_image = mri_image.view(256, 256, 256)
+
+            return mri_image, mri_mask
+
+        elif isinstance(index, slice):
+            sub_ids = self.meta_data.participant_id[index].tolist()
+
+            mri_images = torch.Tensor()
+            mri_masks = torch.Tensor()
+
+            for sub_id in sub_ids:
+                mri_image, mri_mask = self.__get_data(sub_id)
+                mri_image = mri_image.view(1, *mri_image.shape)
+                mri_mask = mri_mask.view(1, *mri_mask.shape)
+
+                mri_images = torch.cat([mri_image, mri_images], 0)
+                mri_masks = torch.cat([mri_mask, mri_masks], 0)
+
+            if self.__transform:
+                mri_images = self.__transform(mri_images)
+
+            return tuple(zip(mri_images, mri_masks))
 
     def __len__(self):
         return self.meta_data.shape[0]
