@@ -104,9 +104,8 @@ class UNet2D(nn.Module):
 
         return source_tensor[:, :, delta:tensor_size - delta, delta:tensor_size - delta]
 
-
 class UNet2Dv2(nn.Module):
-    # Implemented from https://arxiv.org/pdf/1505.04597.pdf
+    # Implemented from https://arxiv.org/pdf/1505.04597.pdf and modified.
     def __init__(self):
         super(UNet2Dv2, self).__init__()
         kernel_size_ = 2
@@ -164,7 +163,7 @@ class UNet2Dv2(nn.Module):
         x = self.up_trans_3(x)
         x = self.up_conv_3(torch.cat([x1, x], 1))
 
-        x = self.out(x)
+        x = F.softmax(self.out(x), dim=1)
 
         return x
 
