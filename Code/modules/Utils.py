@@ -1,4 +1,5 @@
 import glob
+import os
 
 import numpy as np
 import torch
@@ -58,7 +59,8 @@ def get_file_names(path_data):
         {'sub_name': [image_name, mask_name]}
     """
 
-    files = glob.glob(path_data + "/**/*.nii.gz", recursive=True)
+    path = os.path.join(path_data, "**", "*.nii.gz")
+    files = glob.glob(path, recursive=True)
     files = sorted(files)
 
     def pairwise(files):
@@ -67,9 +69,8 @@ def get_file_names(path_data):
         return zip(iterator, iterator)
 
     paths = {}
-
     for image, mask in pairwise(files):
-        paths[image.split('/')[1]] = [image, mask]
+        paths[image.split(os.sep)[1]] = [image, mask]
 
     return paths
 
