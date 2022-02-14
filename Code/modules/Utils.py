@@ -148,7 +148,7 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
     intersection = (pred * mask).sum(-1)
     denominator = (pred + mask).sum(-1)
 
-    dice_scores = (2 * intersection.clamp(min=smooth)) / denominator.clamp(min=smooth)
+    dice_scores = ((2 * intersection).clamp(min=smooth)) / denominator.clamp(min=smooth)
 
     return dice_scores
 
@@ -196,8 +196,9 @@ class TensorboardModules:
             image = torch.Tensor(image)
 
         grid_data = image[:, :, start:end:step].permute(2, 0, 1)
+        n_images, x, y = grid_data.shape
 
-        img_grid = torchvision.utils.make_grid(grid_data.view(10, 1, 256, 256))
+        img_grid = torchvision.utils.make_grid(grid_data.view(n_images, 1, x, y))
         self.writer.add_image(tag, img_grid)
 
     def add_graph(self, model, input_size, device):
@@ -215,8 +216,7 @@ class TensorboardModules:
         None
         """
 
-        w, h = input_size
-        inp = torch.rand((1, 1, w, h)).to(device)
+        inp = torch.rand((1, 1, *input_size)).to(device)
 
         self.writer.add_graph(model, inp)
 
