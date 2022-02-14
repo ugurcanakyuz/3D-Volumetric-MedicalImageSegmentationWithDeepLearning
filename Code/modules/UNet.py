@@ -81,6 +81,7 @@ class UNet2D(nn.Module):
         x = self.up_conv_4(torch.cat([x1, x], 1))
 
         x = self.out(x)
+        # x = F.softmax(x, dim=1) #Don't use if you use crossentropy loss because it has been already implemented in it.
 
         return x
 
@@ -103,6 +104,7 @@ class UNet2D(nn.Module):
         delta = delta // 2
 
         return source_tensor[:, :, delta:tensor_size - delta, delta:tensor_size - delta]
+
 
 class UNet2Dv2(nn.Module):
     # Implemented from https://arxiv.org/pdf/1505.04597.pdf and modified.
@@ -138,7 +140,6 @@ class UNet2Dv2(nn.Module):
                                              )
         self.up_conv_3 = self.__double_conv2d(64, 32)
 
-
         self.out = nn.Conv2d(
             in_channels=32,
             out_channels=8,
@@ -162,8 +163,8 @@ class UNet2Dv2(nn.Module):
         x = self.up_conv_2(torch.cat([x3, x], 1))
         x = self.up_trans_3(x)
         x = self.up_conv_3(torch.cat([x1, x], 1))
-
-        x = F.softmax(self.out(x), dim=1)
+        x = self.out(x)
+        # x = F.softmax(x, dim=1) Don't use if you use crossentropy loss because it has been already implemented in it.
 
         return x
 
@@ -172,15 +173,16 @@ class UNet2Dv2(nn.Module):
         conv = nn.Sequential(
             nn.Conv2d(in_c, out_c, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             nn.BatchNorm2d(out_c),
-            #nn.GroupNorm(4, out_c),
+            # nn.GroupNorm(4, out_c),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_c, out_c, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             nn.BatchNorm2d(out_c),
-            #nn.GroupNorm(4, out_c),
+            # nn.GroupNorm(4, out_c),
             nn.ReLU(inplace=True),
         )
 
         return conv
+
 
 class UNet3D(nn.Module):
     # Implemented from https://arxiv.org/pdf/1606.06650.pdf.
