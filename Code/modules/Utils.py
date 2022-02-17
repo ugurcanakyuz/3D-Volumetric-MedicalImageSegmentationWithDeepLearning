@@ -152,6 +152,36 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
 
     return dice_scores
 
+def calculate_dice_score3d(pred, mask, smooth=1e-5):
+    """This method calculates the dice score for each given class.
+
+    Parameters
+    ----------
+    pred: torch.Tensor
+        [bs, number_of_classes, x, y]
+    mask: torch.Tensor
+        [bs, number_of_classes, x, y]
+    Returns
+    -------
+    dice_scores: torch.Tensor
+        [n_classes, dice_scores] Dice scores of the given classes.
+    """
+
+    (bs, n_classes, x, y, z) = pred.shape
+
+    with torch.no_grad():
+        pred = pred.permute(1, 0, 2, 3, 4).contiguous()
+        pred = pred.view(n_classes, bs * x * y * z)
+
+        mask = mask.permute(1, 0, 2, 3, 4).contiguous()
+        mask = mask.view(n_classes, bs * x * y * z)
+
+    intersection = (pred * mask).sum(-1)
+    denominator = (pred + mask).sum(-1)
+
+    dice_scores = ((2 * intersection).clamp(min=smooth)) / denominator.clamp(min=smooth)
+
+    return dice_scores
 
 class TensorboardModules:
     """This class consists of methods that allow adding data to Tensorboard.
