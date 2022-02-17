@@ -232,7 +232,7 @@ class UNet3D(nn.Module):
         x = torch.cat([x1, x], 1)
         x = self.up_conv3(x)
         x = self.out(x)
-        x = F.softmax(x, dim=1)  # ToDo: Be sure if the dim parameter is correct.
+        # x = F.softmax(x, dim=1)  # ToDo: Be sure if the dim parameter is correct.
 
         return x
 
@@ -240,10 +240,12 @@ class UNet3D(nn.Module):
     def __double_down_conv(in_channels, out_channels, kernel_size_=(3, 3, 3)):
         conv = nn.Sequential(
             nn.Conv3d(in_channels, out_channels // 2, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
-            nn.GroupNorm(4, out_channels // 2),
+            nn.BatchNorm3d(out_channels // 2),
+            # nn.GroupNorm(4, out_channels // 2),
             nn.ReLU(inplace=True),
             nn.Conv3d(out_channels // 2, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
-            nn.GroupNorm(4, out_channels),
+            nn.BatchNorm3d(out_channels),
+            # nn.GroupNorm(4, out_channels),
             nn.ReLU(inplace=True)
         )
 
@@ -253,10 +255,12 @@ class UNet3D(nn.Module):
     def __double_up_conv(in_channels, out_channels, kernel_size_=(3, 3, 3)):
         conv = nn.Sequential(
             nn.Conv3d(in_channels, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
-            nn.GroupNorm(4, out_channels),
+            nn.BatchNorm3d(out_channels),
+            # nn.GroupNorm(8, out_channels),
             nn.ReLU(inplace=True),
             nn.Conv3d(out_channels, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
-            nn.GroupNorm(4, out_channels),
+            nn.BatchNorm3d(out_channels),
+            # nn.GroupNorm(8, out_channels),
             nn.ReLU(inplace=True)
         )
 
