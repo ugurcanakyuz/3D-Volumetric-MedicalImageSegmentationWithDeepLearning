@@ -9,52 +9,44 @@ from modules.Utils import get_file_names
 
 
 class FeTADataSet(Dataset):
-    # def __init__(self, quality=[], labels=[], pathologies=[], load_3d=None):
-    def __init__(self, path="feta_2.1", train=True, transform=None, pathology="all"):
-        """"""
+    """Load FeTA2.1 dataset and splits it into train, validation or test sets.
+    """
+    def __init__(self, set_="train", path="feta_2.1", transform=None):
+        """Creates train, validation or test sets from FeTA2.1 dataset.
+
+        Parameters
+        ----------
+        set_: str
+            "train", "val" or "test"
+        path: str
+            Main folder path of the data.
+        transform: torch or torchio transforms
+        """
 
         count_train = 70  # First 70 MRI image consist of 40 Pathological and 20 Neurotypical.
         self.__path_base = path
-        self.__train = train
         self.__transform = transform
 
         self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
         self.__paths_file = get_file_names(self.__path_base)
 
         # Images below might have bad qualities
-        # self.meta_data = self.meta_data.drop(index=self.meta_data[
-        # self.meta_data["participant_id"]=="sub-007"
-        # ].index)
-        # self.meta_data = self.meta_data.drop(index=self.meta_data[
-        # self.meta_data["participant_id"]=="sub-009"
-        # ].index)
+        # "sub-007" and "sub-009"
+        split_data = _SplitDataset(self.meta_data)
 
-        if pathology == "Pathological":
-            self.meta_data = self.meta_data[self.meta_data.Pathology == "Pathological"]
-        elif pathology == "Neurotypical":
-            self.meta_data = self.meta_data[self.meta_data.Pathology == "Neurotypical"]
+        if set_ == "train":
+            train_indexes = split_data.get_train_indexes()
+            self.meta_data = self.meta_data.iloc[train_indexes]
+        elif set_ == "val":
+            val_indexes = split_data.get_val_indexes()
+            self.meta_data = self.meta_data.iloc[val_indexes]
         else:
-            # Return data for training or test.
-            if self.__train:
-                self.meta_data = self.meta_data[:count_train]
-            else:
-                self.meta_data = self.meta_data[count_train:]
-                self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
+            test_indexes = split_data.get_test_indexes()
+            self.meta_data = self.meta_data.iloc[test_indexes]
 
-    def __get_data(self, sub_id):
-        data = self.__paths_file[sub_id]
-        path_image, path_mask = data[0], data[1]
-
-        mri_image = nib.load(path_image).get_fdata()
-        mri_image = torch.Tensor(mri_image)
-
-        mri_mask = nib.load(path_mask).get_fdata()
-        mri_mask = torch.Tensor(mri_mask)
-
-        return mri_image, mri_mask
+        self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
 
     def __getitem__(self, index):
-        """"""
         if isinstance(index, int):
             sub_id = self.meta_data.participant_id[index]
             mri_image, mri_mask = self.__get_data(sub_id)
@@ -67,8 +59,9 @@ class FeTADataSet(Dataset):
             return mri_image, mri_mask
 
         elif isinstance(index, slice):
-            sub_ids = self.meta_data.participant_id[index].tolist()
+            assert index.stop <= self.meta_data.shape[0], "Index out of range."
 
+            sub_ids = self.meta_data.participant_id[index].tolist()
             mri_images = torch.Tensor()
             mri_masks = torch.Tensor()
 
@@ -88,16 +81,30 @@ class FeTADataSet(Dataset):
     def __len__(self):
         return self.meta_data.shape[0]
 
+    def __get_data(self, sub_id):
+        data = self.__paths_file[sub_id]
+        path_image, path_mask = data[0], data[1]
 
-class SplitDataSet:
+        mri_image = nib.load(path_image).get_fdata()
+        mri_image = torch.Tensor(mri_image)
+
+        mri_mask = nib.load(path_mask).get_fdata()
+        mri_mask = torch.Tensor(mri_mask)
+
+        return mri_image, mri_mask
+
+
+class _SplitDataset:
     """
     There are 80 MRI images of 80 subjects. Gestational ages of subjects ranges 20 weeks to 35 weeks.
     There are Pathological and Neurotypical subjects.
     First 40 MRI images (sub-001 - sub-040) constructed by mialSRTK method.
     Other 40 MRI images (sub-041 - sub-080) constructed by simpleIRTK method.
 
+    Data distribution.
+    ------------------
     mialSRTK reconstruction:
-        * Gestational age <=28 (28 choosed intuitively for diversity gestational weeks and smoother age disturbition)
+        * Gestational age <=28
             - Neurotypical: 7 MRI images.   [train:5, val:1, test:1]
             - Pathological: 20 MRI images.  [train:16, val:2, test:2]
         * Gestational age > 28
@@ -111,6 +118,8 @@ class SplitDataSet:
         * Gestational age > 28
             - Neurotypical: 11 MRI images.  [train:9, val:1, test:1]
             - Pathological: 5 MRI images.   [train:3, val:1, test:1]
+
+    Note:(28 was determined intuitively for diversity gestational weeks and smoother age distribution)
     """
 
     def __init__(self, meta_data):
@@ -143,7 +152,7 @@ class SplitDataSet:
 
         train = [item for sub_arr in train for item in sub_arr]
 
-        return train
+        return sorted(train)
 
     def get_val_indexes(self):
         validation = [self.index1[5:6], self.index2[16:18], self.index3[6:7], self.index4[3:4], self.index5[5:6],
@@ -151,7 +160,7 @@ class SplitDataSet:
 
         validation = [item for sub_arr in validation for item in sub_arr]
 
-        return validation
+        return sorted(validation)
 
     def get_test_indexes(self):
         test = [self.index1[6:], self.index2[18:], self.index3[7:], self.index4[4:], self.index5[6:], self.index6[15:],
@@ -159,4 +168,4 @@ class SplitDataSet:
 
         test = [item for sub_arr in test for item in sub_arr]
 
-        return test
+        return sorted(test)
