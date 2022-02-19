@@ -75,7 +75,7 @@ def get_file_names(path_data):
     return paths
 
 
-def create_onehot_mask(pred_shape, mask, device):
+def create_onehot_mask(pred_shape, mask):
     """Creates onehot mask for multidimensional mask.
 
     Parameters
@@ -88,15 +88,14 @@ def create_onehot_mask(pred_shape, mask, device):
         (bs,1,x,y)
             or
         (bs,1,x,y,z)
-    device: str
-        'cuda' or 'cpu'...
+
     Returns
     -------
     mask_onehot: torch.tensor
         [bs,number_of_classes,x,y,z]
     """
 
-    mask_onehot = torch.zeros(pred_shape, requires_grad=False).to(device)
+    mask_onehot = torch.zeros(pred_shape, requires_grad=False).to(mask.device)
     mask = mask.long()
     mask_onehot.scatter_(1, mask, 1)
 
@@ -127,23 +126,34 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
     Parameters
     ----------
     pred: torch.Tensor
-        [bs, number_of_classes, x, y]
+        [bs, number_of_classes, x, y] or
+        [bs, number_of_classes, x, y, z]
     mask: torch.Tensor
-        [bs, number_of_classes, x, y]
+        [bs, number_of_classes, x, y] or
+        [bs, number_of_classes, x, y, z]
+    smooth: float
+
     Returns
     -------
     dice_scores: torch.Tensor
         [n_classes, dice_scores] Dice scores of the given classes.
     """
-
-    (bs, n_classes, x, y) = pred.shape
-
+    print(pred.shape)
     with torch.no_grad():
-        pred = pred.permute(1, 0, 2, 3).contiguous()
-        pred = pred.view(n_classes, bs * x * y)
+        if len(pred.shape) == 4:
+            (bs, n_classes, x, y) = pred.shape
+            pred = pred.permute(1, 0, 2, 3).contiguous()
+            pred = pred.view(n_classes, bs * x * y)
 
-        mask = mask.permute(1, 0, 2, 3).contiguous()
-        mask = mask.view(n_classes, bs * x * y)
+            mask = mask.permute(1, 0, 2, 3).contiguous()
+            mask = mask.view(n_classes, bs * x * y)
+        elif len(pred.shape) == 5:
+            (bs, n_classes, x, y, z) = pred.shape
+            pred = pred.permute(1, 0, 2, 3, 4).contiguous()
+            pred = pred.view(n_classes, bs * x * y * z)
+
+            mask = mask.permute(1, 0, 2, 3, 4).contiguous()
+            mask = mask.view(n_classes, bs * x * y * z)
 
     intersection = (pred * mask).sum(-1)
     denominator = (pred + mask).sum(-1)
@@ -152,36 +162,6 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
 
     return dice_scores
 
-def calculate_dice_score3d(pred, mask, smooth=1e-5):
-    """This method calculates the dice score for each given class.
-
-    Parameters
-    ----------
-    pred: torch.Tensor
-        [bs, number_of_classes, x, y]
-    mask: torch.Tensor
-        [bs, number_of_classes, x, y]
-    Returns
-    -------
-    dice_scores: torch.Tensor
-        [n_classes, dice_scores] Dice scores of the given classes.
-    """
-
-    (bs, n_classes, x, y, z) = pred.shape
-
-    with torch.no_grad():
-        pred = pred.permute(1, 0, 2, 3, 4).contiguous()
-        pred = pred.view(n_classes, bs * x * y * z)
-
-        mask = mask.permute(1, 0, 2, 3, 4).contiguous()
-        mask = mask.view(n_classes, bs * x * y * z)
-
-    intersection = (pred * mask).sum(-1)
-    denominator = (pred + mask).sum(-1)
-
-    dice_scores = ((2 * intersection).clamp(min=smooth)) / denominator.clamp(min=smooth)
-
-    return dice_scores
 
 class TensorboardModules:
     """This class consists of methods that allow adding data to Tensorboard.
