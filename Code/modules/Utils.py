@@ -138,7 +138,7 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
     dice_scores: torch.Tensor
         [n_classes, dice_scores] Dice scores of the given classes.
     """
-    print(pred.shape)
+
     with torch.no_grad():
         if len(pred.shape) == 4:
             (bs, n_classes, x, y) = pred.shape
