@@ -50,11 +50,12 @@ class FeTADataSet(Dataset):
         if isinstance(index, int):
             sub_id = self.meta_data.participant_id[index]
             mri_image, mri_mask = self.__get_data(sub_id)
+            (x, y, z) = mri_image.shape
 
             if self.__transform:
-                mri_image = mri_image.view(1, 256, 256, 256)
+                mri_image = mri_image.view(1, x, y, z)
                 mri_image = self.__transform(mri_image)
-                mri_image = mri_image.view(256, 256, 256)
+                mri_image = mri_image.view(x, y, z)
 
             return mri_image, mri_mask
 
