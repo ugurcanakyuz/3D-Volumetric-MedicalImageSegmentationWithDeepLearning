@@ -63,19 +63,19 @@ class FeTADataSet(Dataset):
             assert index.stop <= self.meta_data.shape[0], "Index out of range."
 
             sub_ids = self.meta_data.participant_id[index].tolist()
-            mri_images = torch.Tensor()
-            mri_masks = torch.Tensor()
+            mri_images = []
+            mri_masks = []
 
             for sub_id in sub_ids:
                 mri_image, mri_mask = self.__get_data(sub_id)
-                mri_image = mri_image.view(1, *mri_image.shape)
-                mri_mask = mri_mask.view(1, *mri_mask.shape)
 
-                mri_images = torch.cat([mri_image, mri_images], 0)
-                mri_masks = torch.cat([mri_mask, mri_masks], 0)
+                if self.__transform:
+                    mri_image = mri_image.view(1, *mri_image.shape)
+                    mri_image = self.__transform(mri_image)
+                    mri_image = mri_image.view(mri_image.shape[1:])
 
-            if self.__transform:
-                mri_images = self.__transform(mri_images)
+                mri_images.append(mri_image)
+                mri_masks.append(mri_mask)
 
             return tuple(zip(mri_images, mri_masks))
 
