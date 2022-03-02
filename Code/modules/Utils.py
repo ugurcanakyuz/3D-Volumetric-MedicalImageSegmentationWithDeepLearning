@@ -230,8 +230,14 @@ class TensorboardModules:
 
         self.writer.add_graph(model, inp)
 
-    def add_loss(self, loss, step):
+    def add_train_loss(self, loss, step):
         self.writer.add_scalar("Training loss", loss, step)
+
+    def add_val_loss(self, loss, step):
+        self.writer.add_scalar("Validation loss", loss, step)
+
+    def add_lr(self, lr, step):
+        self.writer.add_scalar("Learning rate", lr, step)
 
     def add_dice_score(self, scores, step):
         """Add dice scores of each class to Tensorboard.
@@ -246,5 +252,9 @@ class TensorboardModules:
         None
         """
 
+        cb_labels = ["Background and Non-Brain", "Extra-axial CSF", "Gray Matter and developing cortical plate",
+                     "White matter and subplate", "Lateral ventricles",
+                     "Cerebellum", "Thalamus and putamen", "Brainstem"]
+
         for class_id, dice_score in enumerate(scores):
-            self.writer.add_scalar(f"Class {class_id+1} training dice score", dice_score.item(), step)
+            self.writer.add_scalar(f"Dice Score of class: {class_id}-{cb_labels[class_id]}\n", dice_score.item(), step)
