@@ -69,10 +69,11 @@ class Evaluator2D:
         avg_score = evaluator.evaluate(model)
     """
 
-    def __init__(self, model, val_loader):
+    def __init__(self, criterion, model, val_loader):
         self.val_loader = val_loader
-
+        self.bs_2d = 16  # Batch size of 2D slices.
         self.device = next(model.parameters()).device
+        self.val_criterion = criterion
 
         out_channels = model.out.out_channels
         sample = next(iter(val_loader))
@@ -92,21 +93,45 @@ class Evaluator2D:
             Average dice score for each class.
         """
 
+        running_losses = []
         running_dice_scores = torch.zeros(self.output_shape[1]).to(self.device)
+        count_forward = 0
+
         with torch.no_grad():
             for j, (image, mask) in enumerate(self.val_loader):
                 image = image.to(self.device)  # [bs,x,y,z]
-                image = image.view(self.output_shape[0], 1, *self.output_shape[2:])  # [bs,c,x,y,z]
+                mask = mask.to(self.device)  # [bs,x,y,z] Most likely bs=1.
+                mask = torch.unsqueeze(mask, 1) # [bs, 1, x,y,z]
+                output_mask = torch.Tensor().to(self.device)
 
-                mask = mask.to(self.device)  # [x,y,z]
-                mask = mask.view(self.output_shape[0], 1, *self.output_shape[2:])  # [bs,1,x,y,z]
+                for slice_ix in range(0, image.shape[1], self.bs_2d):
+                    start = slice_ix
+                    stop = slice_ix + self.bs_2d
 
-                output = F.softmax(model(image), dim=1)
-                one_hot_mask = create_onehot_mask(output.shape, mask)
+                    if stop > image.shape[1]:
+                        stop = image.shape[1]
 
-                scores = calculate_dice_score(output, one_hot_mask)
+                    slice_image = image[:, start:stop]
+                    slice_image = slice_image.view(-1, 1, 256, 256)
+
+                    output = model(slice_image)
+                    output_mask = torch.cat((output_mask, output))
+
+                output_mask = output_mask.view(mask.shape[0], *output_mask.shape)  # [bs_3d, bs_2d, n_c, x, y]
+                output_mask = output_mask.permute(0, 2, 1, 3, 4).contiguous()   # [bs_3d, n_c, x(bs_2d), y, z]
+
+                val_loss = self.val_criterion(output_mask, mask)
+                running_losses.append(val_loss.item())
+
+                # To calculate DS, convert raw model outputs to softmax outputs.
+                output_mask = F.softmax(output_mask, dim=1)
+                one_hot_mask = create_onehot_mask(output_mask.shape, mask)
+
+                scores = calculate_dice_score(output_mask, one_hot_mask)
                 running_dice_scores += scores
+                count_forward += 1
 
-            avg_scores = running_dice_scores / len(self.val_loader)
+            avg_loss = sum(running_losses) / len(running_losses)
+            avg_scores = running_dice_scores / count_forward
 
-        return avg_scores
+        return avg_loss, avg_scores
