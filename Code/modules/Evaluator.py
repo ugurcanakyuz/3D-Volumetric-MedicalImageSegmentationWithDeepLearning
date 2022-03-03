@@ -64,7 +64,7 @@ class Evaluator3D:
                     running_dice_scores += scores
 
             avg_loss = sum(running_losses) / len(running_losses)
-            avg_scores = running_dice_scores / len(self.val_loader) * len(self.patch_indexes)
+            avg_scores = running_dice_scores / (len(self.val_loader) * len(self.patch_indexes))
 
         return avg_loss, avg_scores
 
