@@ -163,6 +163,31 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
     return dice_scores
 
 
+class EarlyStopping:
+    # Implemented from https://debuggercafe.com/using-learning-rate-scheduler-and-early-stopping-with-pytorch/
+    # and modified.
+
+    def __init__(self, patience=5, min_delta=0.025):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.best_loss = None
+        self.early_stop = False
+
+    def __call__(self, val_loss):
+        if self.best_loss is None:
+            self.best_loss = val_loss
+        elif self.best_loss - val_loss > self.min_delta:
+            self.best_loss = val_loss
+            # reset counter if validation loss improves
+            self.counter = 0
+        elif self.best_loss - val_loss < self.min_delta:
+            self.counter += 1
+            #print(f"INFO: Early stopping counter {self.counter} of {self.patience}")
+            if self.counter >= self.patience:
+                print('INFO: Early stopping')
+                self.early_stop = True
+
 class TensorboardModules:
     """This class consists of methods that allow adding data to Tensorboard.
     """
@@ -230,12 +255,6 @@ class TensorboardModules:
 
         self.writer.add_graph(model, inp)
 
-    def add_train_loss(self, loss, step):
-        self.writer.add_scalar("Training loss", loss, step)
-
-    def add_val_loss(self, loss, step):
-        self.writer.add_scalar("Validation loss", loss, step)
-
     def add_lr(self, lr, step):
         self.writer.add_scalar("Learning rate", lr, step)
 
@@ -257,4 +276,11 @@ class TensorboardModules:
                      "Cerebellum", "Thalamus and putamen", "Brainstem"]
 
         for class_id, dice_score in enumerate(scores):
-            self.writer.add_scalar(f"Dice Score of class: {class_id}-{cb_labels[class_id]}\n", dice_score.item(), step)
+            self.writer.add_scalar(f"Dice Score of class: {class_id}-{cb_labels[class_id]}", dice_score.item(), step)
+
+    def add_train_loss(self, loss, step):
+        self.writer.add_scalar("Training loss", loss, step)
+
+    def add_val_loss(self, loss, step):
+        self.writer.add_scalar("Validation loss", loss, step)
+        
