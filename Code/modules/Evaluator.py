@@ -11,11 +11,11 @@ class Evaluator3D:
         avg_score = evaluator.evaluate(model)
     """
 
-    def __init__(self, model, patch_indexes, val_loader):
+    def __init__(self, criterion, model, patch_indexes, val_loader):
         self.patch_indexes = patch_indexes
         self.val_loader = val_loader
-
         self.device = next(model.parameters()).device
+        self.val_criterion = criterion
 
         out_channels = model.out.out_channels
         sample = next(iter(val_loader))
@@ -35,14 +35,17 @@ class Evaluator3D:
             Average dice score for each class.
         """
 
+        running_losses = []
         running_dice_scores = torch.zeros(self.output_shape[1]).to(self.device)
+        count_forward = 0
+
         with torch.no_grad():
             for j, (image, mask) in enumerate(self.val_loader):
                 image = image.to(self.device)  # [bs,x,y,z]
-                image = image.view(self.output_shape[0], 1, *self.output_shape[2:])  # [bs,c,x,y,z]
+                image = image.unsqueeze(1)  # [bs,1,x,y,z]
 
                 mask = mask.to(self.device)  # [x,y,z]
-                mask = mask.view(self.output_shape[0], 1, *self.output_shape[2:])  # [bs,1,x,y,z]
+                mask = mask.unsqueeze(1) # [bs,1,x,y,z]
 
                 for coors in self.patch_indexes:
                     [sx, sy, sz] = coors[0]
@@ -51,14 +54,19 @@ class Evaluator3D:
                     patch_mask = mask[:, :, sx:ex, sy:ey, sz:ez]
 
                     output = F.softmax(model(patch_image), dim=1)
+                    val_loss = self.val_criterion(output, patch_mask)
+                    running_losses.append(val_loss.item())
+
                     one_hot_mask = create_onehot_mask(output.shape, patch_mask)
+                    output = F.softmax(output, dim=1)
 
                     scores = calculate_dice_score(output, one_hot_mask)
                     running_dice_scores += scores
 
+            avg_loss = sum(running_losses) / len(running_losses)
             avg_scores = running_dice_scores / len(self.val_loader) * len(self.patch_indexes)
 
-        return avg_scores
+        return avg_loss, avg_scores
 
 
 class Evaluator2D:
