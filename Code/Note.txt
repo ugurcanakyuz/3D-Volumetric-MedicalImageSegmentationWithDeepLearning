@@ -1,6 +1,0 @@
-Correct data and masks are feeding into network.
-Inputs get normalized.
-Group normalization used.
-Network architecture looks ok.
-Label onehot encoding is ok.
-GDCLoss and Crossentropy loss are ok. Even change the loss functions loss results always are similar and not changing during the training.
