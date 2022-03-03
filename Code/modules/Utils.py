@@ -183,10 +183,11 @@ class EarlyStopping:
             self.counter = 0
         elif self.best_loss - val_loss < self.min_delta:
             self.counter += 1
-            #print(f"INFO: Early stopping counter {self.counter} of {self.patience}")
+            # print(f"INFO: Early stopping counter {self.counter} of {self.patience}")
             if self.counter >= self.patience:
                 print('INFO: Early stopping')
                 self.early_stop = True
+
 
 class TensorboardModules:
     """This class consists of methods that allow adding data to Tensorboard.
@@ -201,6 +202,7 @@ class TensorboardModules:
             Storage path of the event files.
         """
 
+        self.step = 0
         self.writer = SummaryWriter(log_dir)
 
     def close(self):
@@ -255,10 +257,10 @@ class TensorboardModules:
 
         self.writer.add_graph(model, inp)
 
-    def add_lr(self, lr, step):
-        self.writer.add_scalar("Learning rate", lr, step)
+    def add_lr(self, lr):
+        self.writer.add_scalar("Learning rate", lr, self.step)
 
-    def add_dice_score(self, scores, step):
+    def add_dice_score(self, scores):
         """Add dice scores of each class to Tensorboard.
 
         Parameters
@@ -276,11 +278,35 @@ class TensorboardModules:
                      "Cerebellum", "Thalamus and putamen", "Brainstem"]
 
         for class_id, dice_score in enumerate(scores):
-            self.writer.add_scalar(f"Dice Score of class: {class_id}-{cb_labels[class_id]}", dice_score.item(), step)
+            self.writer.add_scalar(f"Dice Score of class: {class_id}-{cb_labels[class_id]}",
+                                   dice_score.item(), self.step)
 
-    def add_train_loss(self, loss, step):
-        self.writer.add_scalar("Training loss", loss, step)
+    def add_train_loss(self, loss):
+        self.writer.add_scalar("Training loss", loss, self.step)
 
-    def add_val_loss(self, loss, step):
-        self.writer.add_scalar("Validation loss", loss, step)
-        
+    def add_val_loss(self, loss):
+        self.writer.add_scalar("Validation loss", loss, self.step)
+
+    def add_scalars(self, step, ds=0, lr=0, train_loss=0, val_loss=0):
+        """ Add scalars to tensorboard.
+
+        Parameters
+        ----------
+        step: int
+        ds: list of floats
+            Dice scores.
+        lr: float
+            Learning rate.
+        train_loss: float
+        val_loss: float
+
+        Returns
+        -------
+        None.
+        """
+
+        self.step = step
+        self.add_dice_score(ds)
+        self.add_lr(lr)
+        self.add_train_loss(train_loss)
+        self.add_val_loss(val_loss)
