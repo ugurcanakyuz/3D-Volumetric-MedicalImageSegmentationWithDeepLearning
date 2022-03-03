@@ -27,7 +27,7 @@ class Evaluator3D:
 
         Parameters
         ----------
-        model: torch.model
+        model: torch.Model
 
         Returns
         -------
@@ -37,7 +37,6 @@ class Evaluator3D:
 
         running_losses = []
         running_dice_scores = torch.zeros(self.output_shape[1]).to(self.device)
-        count_forward = 0
 
         with torch.no_grad():
             for j, (image, mask) in enumerate(self.val_loader):
@@ -45,7 +44,7 @@ class Evaluator3D:
                 image = image.unsqueeze(1)  # [bs,1,x,y,z]
 
                 mask = mask.to(self.device)  # [x,y,z]
-                mask = mask.unsqueeze(1) # [bs,1,x,y,z]
+                mask = mask.unsqueeze(1)  # [bs,1,x,y,z]
 
                 for coors in self.patch_indexes:
                     [sx, sy, sz] = coors[0]
@@ -53,7 +52,7 @@ class Evaluator3D:
                     patch_image = image[:, :, sx:ex, sy:ey, sz:ez]
                     patch_mask = mask[:, :, sx:ex, sy:ey, sz:ez]
 
-                    output = F.softmax(model(patch_image), dim=1)
+                    output = model(patch_image)
                     val_loss = self.val_criterion(output, patch_mask)
                     running_losses.append(val_loss.item())
 
@@ -93,7 +92,7 @@ class Evaluator2D:
 
         Parameters
         ----------
-        model: torch.model
+        model: torch.Model
 
         Returns
         -------
@@ -109,7 +108,7 @@ class Evaluator2D:
             for j, (image, mask) in enumerate(self.val_loader):
                 image = image.to(self.device)  # [bs,x,y,z]
                 mask = mask.to(self.device)  # [bs,x,y,z] Most likely bs=1.
-                mask = torch.unsqueeze(mask, 1) # [bs, 1, x,y,z]
+                mask = torch.unsqueeze(mask, 1)  # [bs, 1, x,y,z]
                 output_mask = torch.Tensor().to(self.device)
 
                 for slice_ix in range(0, image.shape[1], self.bs_2d):

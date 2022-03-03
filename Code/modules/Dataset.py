@@ -11,6 +11,7 @@ from modules.Utils import get_file_names
 class FeTADataSet(Dataset):
     """Load FeTA2.1 dataset and splits it into train, validation or test sets.
     """
+
     def __init__(self, set_="train", path="feta_2.1", transform=None):
         """Creates train, validation or test sets from FeTA2.1 dataset.
 
@@ -23,7 +24,6 @@ class FeTADataSet(Dataset):
         transform: torch or torchio transforms
         """
 
-        count_train = 70  # First 70 MRI image consist of 40 Pathological and 20 Neurotypical.
         self.__path_base = path
         self.__transform = transform
 
@@ -120,7 +120,7 @@ class _SplitDataset:
             - Neurotypical: 11 MRI images.  [train:9, val:1, test:1]
             - Pathological: 5 MRI images.   [train:3, val:1, test:1]
 
-    Note:(28 was determined intuitively for diversity gestational weeks and smoother age distribution)
+    Note: 28 was determined intuitively for diversity gestational weeks and smoother age distribution
     """
 
     def __init__(self, meta_data):

@@ -46,7 +46,7 @@ def create_patch_indexes(image_shape, patch_sizes):
 
 
 def get_file_names(path_data):
-    """List the files in sub directories.
+    """List the files in subdirectories.
 
     Parameters
     ----------
@@ -84,14 +84,14 @@ def create_onehot_mask(pred_shape, mask):
         (bs,number_of_classes,x,y)
                     or
         (bs,number_of_classes,x,y,z)
-    mask: torch.tensor
+    mask: torch.Tensor
         (bs,1,x,y)
             or
         (bs,1,x,y,z)
 
     Returns
     -------
-    mask_onehot: torch.tensor
+    mask_onehot: torch.Tensor
         [bs,number_of_classes,x,y,z]
     """
 
@@ -108,7 +108,7 @@ def init_weights_kaiming(m):
 
     Parameters
     ----------
-    m: torch.model
+    m: torch.Model
 
     Returns
     -------
@@ -265,8 +265,7 @@ class TensorboardModules:
 
         Parameters
         ----------
-        scores: torch.Tensor
-        step: int
+        scores: list of torch.Tensor
 
         Returns
         -------
