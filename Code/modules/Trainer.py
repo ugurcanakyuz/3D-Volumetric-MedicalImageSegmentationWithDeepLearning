@@ -33,7 +33,6 @@ class Trainer2D:
         device = next(self.model.parameters()).device
         count_forward = 0
         running_loss = 0.0
-        running_dice_scores = torch.zeros(8).to(device)
         bs_2d = 16
 
         prog_bar = tqdm.tqdm(enumerate(self.train_loader),
@@ -66,7 +65,7 @@ class Trainer2D:
                 loss.backward()
                 self.optimizer.step()
 
-                # Sum losses and dice scores for all predicitions.
+                # Sum losses and dice scores for all predictions.
                 running_loss += loss.item()
                 count_forward += 1
 
@@ -131,7 +130,7 @@ class Trainer3D:
                     loss.backward()
                     self.optimizer.step()
 
-                    # Sum losses and dice scores for all predicitions.
+                    # Sum losses and dice scores for all predictions.
                     running_loss += loss.item()
                     count_forward += 1
 
