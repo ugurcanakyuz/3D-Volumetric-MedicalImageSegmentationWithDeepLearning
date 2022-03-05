@@ -1,7 +1,9 @@
 import glob
 import os
+import tempfile
 
 import numpy as np
+import matplotlib.pyplot as plt
 import torch
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
@@ -187,6 +189,44 @@ class EarlyStopping:
             if self.counter >= self.patience:
                 print('INFO: Early stopping')
                 self.early_stop = True
+
+
+class LearningRateFinder:
+    """ Learning rate finder changes the learning rate of the model within given lr range
+    and finds losses for each training with corresponding lr.
+    """
+    
+    def __init__(self, trainer):
+        self.trainer = trainer
+
+        self.lrs = []
+        self.losses = []
+
+    def find(self, startLR=10e-10, endLR=1e+1, lr_factor=1e+1):
+        """Searches best learning rates between given learning rates and factor.
+        """
+
+        curr_lr = startLR
+
+        while curr_lr <= endLR:
+            # One forward pass for all training data.
+            avg_train_loss = self.trainer.fit()
+
+            self.lrs.append(curr_lr)
+            self.losses.append(avg_train_loss)
+            curr_lr *= lr_factor
+            self.trainer.optimizer.param_groups[0]['lr'] = curr_lr
+
+        self.__plot_loss()
+
+    def __plot_loss(self):
+        plt.plot(self.lrs, self.losses)
+        plt.ylim(min(self.losses), 3)  # These limits where choosen due to DS+BCE Loss range to visualize curve better.
+        plt.xscale("log")
+        plt.xlabel("Learning Rate (Log Scale)")
+        plt.ylabel("Loss")
+        plt.title("Learning Rates")
+        plt.show()
 
 
 class TensorboardModules:
