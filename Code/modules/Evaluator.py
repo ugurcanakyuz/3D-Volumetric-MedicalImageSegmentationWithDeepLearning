@@ -52,18 +52,22 @@ class Evaluator3D:
                     patch_image = image[:, :, sx:ex, sy:ey, sz:ez]
                     patch_mask = mask[:, :, sx:ex, sy:ey, sz:ez]
 
-                    output = model(patch_image)
-                    val_loss = self.val_criterion(output, patch_mask)
-                    running_losses.append(val_loss.item())
+                    unique, counts = torch.unique(mask[sx:ex, sy:ey, sz:ez], return_counts=True)
 
-                    one_hot_mask = create_onehot_mask(output.shape, patch_mask)
-                    output = F.softmax(output, dim=1)
+                    # if the label count below the 70 pixel don't train with it.
+                    if torch.any(counts[1:] > 70):
+                        output = model(patch_image)
+                        val_loss = self.val_criterion(output, patch_mask)
+                        running_losses.append(val_loss.item())
 
-                    scores = calculate_dice_score(output, one_hot_mask)
-                    running_dice_scores += scores
+                        one_hot_mask = create_onehot_mask(output.shape, patch_mask)
+                        output = F.softmax(output, dim=1)
+
+                        scores = calculate_dice_score(output, one_hot_mask)
+                        running_dice_scores += scores
 
             avg_loss = sum(running_losses) / len(running_losses)
-            avg_scores = running_dice_scores / (len(self.val_loader) * len(self.patch_indexes))
+            avg_scores = running_dice_scores / len(running_losses)
 
         return avg_loss, avg_scores
 
