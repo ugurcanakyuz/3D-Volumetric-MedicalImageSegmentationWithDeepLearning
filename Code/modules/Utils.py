@@ -1,6 +1,5 @@
 import glob
 import os
-import tempfile
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -165,6 +164,38 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
     return dice_scores
 
 
+def plot_sub(image, mask, pred_mask=None):
+    """ Plots image, mask and prediction.
+
+    Parameters
+    ----------
+    image: torch.Tensor
+    mask: torch.Tensor
+    pred_mask: torch.Tensor
+
+    Returns
+    -------
+    None
+    """
+
+    fig = plt.figure(figsize=(13, 13))
+    fig.add_subplot(1, 3, 1)
+    plt.imshow(image)
+    fig.add_subplot(1, 3, 2)
+    plt.imshow(mask)
+
+    try:
+        if torch.any(pred_mask):
+            fig.add_subplot(1, 3, 3)
+            plt.imshow(pred_mask)
+    except TypeError:
+        if np.any(pred_mask):
+            fig.add_subplot(1, 3, 3)
+            plt.imshow(pred_mask)
+
+    plt.show()
+
+
 class EarlyStopping:
     # Implemented from https://debuggercafe.com/using-learning-rate-scheduler-and-early-stopping-with-pytorch/
     # and modified.
@@ -195,7 +226,7 @@ class LearningRateFinder:
     """ Learning rate finder changes the learning rate of the model within given lr range
     and finds losses for each training with corresponding lr.
     """
-    
+
     def __init__(self, trainer):
         self.trainer = trainer
 
