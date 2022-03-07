@@ -115,7 +115,7 @@ class Trainer3D:
             subject = tio.Subject(
                 image=tio.ScalarImage(tensor=image),
                 mask=tio.LabelMap(tensor=mask),
-              # sampling_map=sampling_map_              # Mask is more stable for sampling.
+                # sampling_map=tio.Image(tensor=mask, type=tio.SAMPLING_MAP),               # Mask is more stable for sampling.
             )
 
             for j, patch in enumerate(sampler(subject)):
