@@ -233,13 +233,13 @@ class LearningRateFinder:
         self.lrs = []
         self.losses = []
 
-    def find(self, startLR=10e-10, endLR=1e+1, lr_factor=1e+1):
+    def find(self, min_lr=10e-10, max_lr=1e+1, lr_factor=1e+1):
         """Searches best learning rates between given learning rates and factor.
         """
 
-        curr_lr = startLR
+        curr_lr = min_lr
 
-        while curr_lr <= endLR:
+        while curr_lr <= max_lr:
             # One forward pass for all training data.
             avg_train_loss = self.trainer.fit()
 
