@@ -261,7 +261,7 @@ class LearningRateFinder:
 
 
 class TensorboardModules:
-    """This class consists of methods that allow adding data to Tensorboard.
+    """This class consists of methods that allow adding data into Tensorboard.
     """
 
     def __init__(self, log_dir="events"):
@@ -282,7 +282,7 @@ class TensorboardModules:
         self.writer.close()
 
     def add_images(self, tag, image, slices):
-        """Adds images to tensorboard.
+        """Adds images into tensorboard.
 
         Parameters
         ----------
@@ -309,8 +309,34 @@ class TensorboardModules:
         img_grid = torchvision.utils.make_grid(grid_data.view(n_images, 1, x, y))
         self.writer.add_image(tag, img_grid)
 
+    def add_image_mask(self, mri_image, mri_mask, slices):
+        """Adds 2D slices of 3D image and mask into the tensorboard.
+
+        Parameters
+        ----------
+        mri_image: torch.Tensor or ndarray
+        mri_mask: torch.Tensor or ndarray
+        slices: tuple of int
+            (start, end, step)
+
+        Returns
+        -------
+        None.
+        """
+        class_index = max(np.unique(mri_mask))
+
+        for i in range(*slices):
+            mri_mask[:, :, i][mri_mask[:, :, i] == class_index] = 255
+            class_index -= 1
+
+            if class_index <= 0:
+                class_index = max(np.unique(mri_mask))
+
+        self.add_images("Fetal Brain Images", mri_image, slices)
+        self.add_images("Fetal Brain Masks", mri_mask, slices)
+
     def add_graph(self, model, input_size, device):
-        """Creates an input to model and adds model graph to Tensorboard.
+        """Creates an input to model and adds model graph into Tensorboard.
 
         Parameters
         ----------
@@ -332,7 +358,7 @@ class TensorboardModules:
         self.writer.add_scalar("Learning rate", lr, self.step)
 
     def add_dice_score(self, scores):
-        """Add dice scores of each class to Tensorboard.
+        """Add dice scores of each class into Tensorboard.
 
         Parameters
         ----------
@@ -358,7 +384,7 @@ class TensorboardModules:
         self.writer.add_scalar("Validation loss", loss, self.step)
 
     def add_scalars(self, step, ds=0, lr=0, train_loss=0, val_loss=0):
-        """ Add scalars to tensorboard.
+        """ Add scalars into tensorboard.
 
         Parameters
         ----------
