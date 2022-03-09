@@ -1,4 +1,3 @@
-import torch
 import torchio as tio
 import tqdm
 
@@ -83,13 +82,13 @@ class Trainer2D:
 
 
 class Trainer3D:
-    def __init__(self, model, train_loader, optimizer, criterion, patch_indexes, total_epochs, scheduler=None):
+    def __init__(self, model, train_loader, optimizer, criterion, patch_size, total_epochs, scheduler=None):
         self.curr_epoch = 0
 
         self.criterion = criterion
         self.model = model
         self.optimizer = optimizer
-        self.patch_indexes = patch_indexes
+        self.patch_size = patch_size
         self.scheduler = scheduler
         self.total_epochs = total_epochs
         self.train_loader = train_loader
@@ -102,9 +101,9 @@ class Trainer3D:
         epoch_loss = []
         running_loss = []  # This is only for loss indicator.
 
-        patch_size_ = 128
         # sampler = tio.data.WeightedSampler(patch_size_, "sampling_map")
-        sampler = tio.data.GridSampler(patch_size=patch_size_)
+        # sampler = tio.data.GridSampler(patch_size=patch_size_)
+        sampler = tio.data.UniformSampler(patch_size=self.patch_size)
 
         prog_bar = tqdm.tqdm(enumerate(self.train_loader),
                              total=int(len(self.train_loader) / self.train_loader.batch_size))
@@ -115,27 +114,26 @@ class Trainer3D:
             subject = tio.Subject(
                 image=tio.ScalarImage(tensor=image),
                 mask=tio.LabelMap(tensor=mask),
-                # sampling_map=tio.Image(tensor=mask, type=tio.SAMPLING_MAP),               # Mask is more stable for sampling.
+                # sampling_map=tio.Image(tensor=mask, type=tio.SAMPLING_MAP),       # Mask is more stable for sampling.
             )
 
             for j, patch in enumerate(sampler(subject)):
-                patch_mask = patch.mask.data.unsqueeze(1).to(device)  # [bs,1,x,y,z]
-                # if the patch_mask is all zero skip this patch.
-                if not torch.all(patch_mask == 0):
-                    patch_image = patch.image.data
-                    patch_image = patch_image.unsqueeze(1).to(device)  # [bs,1,x,y,z]
+                patch_mask = patch["mask"].data.unsqueeze(1).to(device)  # [bs,1,x,y,z]
+                patch_image = patch["image"].data
+                patch_image = patch_image.unsqueeze(1).to(device)  # [bs,1,x,y,z]
 
-                    outputs = self.model(patch_image.float())
-                    loss = self.criterion(outputs, patch_mask)
+                outputs = self.model(patch_image.float())
+                loss = self.criterion(outputs, patch_mask)
 
-                    self.optimizer.zero_grad()
-                    loss.backward()
-                    self.optimizer.step()
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
 
-                    # Sum losses scores for all predictions.
-                    running_loss.append(loss.item())
-                    # if j>3:
-                    #   break
+                # Sum losses scores for all predictions.
+                running_loss.append(loss.item())
+
+                if not j > 7:
+                    break
 
             avg_loss = sum(running_loss) / len(running_loss)
             running_loss = []
