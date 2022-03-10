@@ -132,7 +132,7 @@ class Trainer3D:
                 # Sum losses scores for all predictions.
                 running_loss.append(loss.item())
 
-                if not j > 7:
+                if j > 7:
                     break
 
             avg_loss = sum(running_loss) / len(running_loss)
