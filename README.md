@@ -1,7 +1,7 @@
 ![](https://img.shields.io/badge/PyTorch-1.10-green)
 ![](https://img.shields.io/badge/OpenCV-4.5-blue)
 ![](https://img.shields.io/badge/NiBabel-3.2-red)
-# Volumetric(3D) Segmentation with deep learning models.
+# 3D (Volumetric) Segmentation with deep learning models.
 This repository was created for machine learning research on FeTA2.1 dataset. Aim of the project is building segmentation models for volumetric segmentation of Fetal Brain MRI Images.
 
 ### 1. Data
