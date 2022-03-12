@@ -19,8 +19,6 @@ class Trainer2D:
         self.total_epochs = total_epochs
         self.train_loader = train_loader
 
-        model.train()
-
     def fit(self):
         """Trains the model with given data.
 
@@ -40,6 +38,7 @@ class Trainer2D:
         prog_bar.set_description(f"Epoch [{self.curr_epoch + 1}/{self.total_epochs}]")
         prog_bar.set_postfix_str(f'Loss: {avg_train_loss}')
 
+        self.model.train()
         for i, (image, mask) in prog_bar:
             image = image.to(device)  # [bs,x,y,z]
             mask = mask.to(device)  # [x,y,z]
@@ -93,8 +92,6 @@ class Trainer3D:
         self.total_epochs = total_epochs
         self.train_loader = train_loader
 
-        model.train()
-
     def fit(self):
         avg_loss = None
         device = next(self.model.parameters()).device
@@ -110,6 +107,7 @@ class Trainer3D:
         prog_bar.set_description(f"Epoch [{self.curr_epoch + 1}/{self.total_epochs}]")
         prog_bar.set_postfix_str(f'Loss: {avg_loss}')
 
+        self.model.train()
         for i, (image, mask) in prog_bar:
             subject = tio.Subject(
                 image=tio.ScalarImage(tensor=image),
