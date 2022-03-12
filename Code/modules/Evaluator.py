@@ -15,6 +15,7 @@ class Evaluator2D:
     """
 
     def __init__(self, criterion, model, val_loader):
+        self.model = model
         self.val_loader = val_loader
         self.bs_2d = 16  # Batch size of 2D slices.
         self.device = next(model.parameters()).device
@@ -25,12 +26,12 @@ class Evaluator2D:
         shape = tuple(sample[0].shape[1:])
         self.output_shape = (val_loader.batch_size, out_channels, *shape)
 
-    def evaluate(self, model):
+    def evaluate(self):
         """Calculates dice score for each class.
 
         Parameters
         ----------
-        model: torch.Model
+        None.
 
         Returns
         -------
@@ -42,6 +43,7 @@ class Evaluator2D:
         running_dice_scores = torch.zeros(self.output_shape[1]).to(self.device)
         count_forward = 0
 
+        self.model.eval()
         with torch.no_grad():
             for j, (image, mask) in enumerate(self.val_loader):
                 image = image.to(self.device)  # [bs,x,y,z]
@@ -59,7 +61,7 @@ class Evaluator2D:
                     slice_image = image[:, start:stop]
                     slice_image = slice_image.view(-1, 1, 256, 256)
 
-                    output = model(slice_image)
+                    output = self.model(slice_image)
                     output_mask = torch.cat((output_mask, output))
 
                 output_mask = output_mask.view(mask.shape[0], *output_mask.shape)  # [bs_3d, bs_2d, n_c, x, y]
@@ -82,92 +84,6 @@ class Evaluator2D:
         return avg_loss, avg_scores
 
 
-class Evaluator3Dv2:
-    """This class consist of evaluation method. Evaluate method calculates dice score per channel.
-
-    Example:
-        evaluator = Evaluator3D(model, patch_indexes, test_loader)
-        avg_score = evaluator.evaluate(model)
-    """
-
-    def __init__(self, criterion, model, patch_indexes, val_loader):
-        self.patch_indexes = patch_indexes
-        self.val_loader = val_loader
-        self.device = next(model.parameters()).device
-        self.val_criterion = criterion
-
-        out_channels = model.out.out_channels
-        sample = next(iter(val_loader))
-        shape = tuple(sample[0].shape[1:])
-        self.output_shape = (val_loader.batch_size, out_channels, *shape)
-
-    def evaluate(self, model):
-        """Calculates dice score for each class.
-
-        Parameters
-        ----------
-        model: torch.Model
-
-        Returns
-        -------
-        avg_scores: float
-            Average dice score for each class.
-        """
-
-        avg_val_loss = None
-        epoch_loss = []
-        running_losses = []
-        running_dice_scores = []
-        pred_mask = torch.zeros(*self.output_shape).to(self.device)
-
-        prog_bar = tqdm.tqdm(enumerate(self.val_loader),
-                             total=int(len(self.val_loader) / self.val_loader.batch_size))
-        prog_bar.set_description(f"Validation ")
-        prog_bar.set_postfix_str(f'Loss: {avg_val_loss}')
-
-        with torch.no_grad():
-            for j, (image, mask) in prog_bar:
-                image = image.to(self.device)  # [bs,x,y,z]
-                image = image.unsqueeze(1)  # [bs,1,x,y,z]
-
-                mask = mask.to(self.device)  # [x,y,z]
-                mask = mask.unsqueeze(1)  # [bs,1,x,y,z]
-
-                # Predict image patches and aggregate them into grid.
-                for coors in self.patch_indexes:
-                    [sx, sy, sz] = coors[0]
-                    [ex, ey, ez] = coors[1]
-                    patch_image = image[:, :, sx:ex, sy:ey, sz:ez]
-                    patch_mask = mask[:, :, sx:ex, sy:ey, sz:ez]
-
-                    output = model(patch_image)
-
-                    # Aggregate patches into grid.
-                    pred_mask[:, :, sx:ex, sy:ey, sz:ez] = output
-
-                    # Validation loss calculated on the aggregated so whole predicted mask.
-                    # Criterion accepts raw logits so softmax has not been applied to predicted mask yet.
-                    val_loss = self.val_criterion(output, patch_mask)
-                    running_losses.append(val_loss.item())
-
-                # To calculate Dice Score get softmax applied predicted mask.
-                pred_mask = F.softmax(pred_mask, dim=1)
-                one_hot_mask = create_onehot_mask(pred_mask.shape, mask)
-
-                scores = calculate_dice_score(pred_mask, one_hot_mask)
-                running_dice_scores.append(scores)
-
-                avg_loss = sum(running_losses) / len(running_losses)
-                running_losses = []
-                epoch_loss.append(avg_loss)
-                prog_bar.set_postfix_str(f'Loss: {sum(epoch_loss) / len(epoch_loss):.4f}')
-
-            avg_loss = sum(epoch_loss) / len(epoch_loss)
-            avg_scores = sum(running_dice_scores) / len(running_dice_scores)
-
-        return avg_loss, avg_scores
-
-
 class Evaluator3D:
     """This class consist of evaluation method. Evaluate method calculates dice score per channel.
 
@@ -177,6 +93,7 @@ class Evaluator3D:
     """
 
     def __init__(self, criterion, model, patch_size, val_loader):
+        self.model = model
         self.patch_size = patch_size
         self.val_loader = val_loader
         self.device = next(model.parameters()).device
@@ -187,12 +104,12 @@ class Evaluator3D:
         shape = tuple(sample[0].shape[1:])
         self.output_shape = (val_loader.batch_size, out_channels, *shape)
 
-    def evaluate(self, model):
+    def evaluate(self):
         """Calculates dice score for each class.
 
         Parameters
         ----------
-        model: torch.Model
+        None.
 
         Returns
         -------
@@ -213,6 +130,7 @@ class Evaluator3D:
         prog_bar.set_description(f"Validation ")
         prog_bar.set_postfix_str(f'Loss: {avg_val_loss}')
 
+        self.model.eval()
         with torch.no_grad():
             for i, (image, mask) in prog_bar:
                 subject = tio.Subject(
@@ -225,8 +143,8 @@ class Evaluator3D:
                 for j, patch in enumerate(sampler(subject)):
                     patch_image = patch["image"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
 
-                    output = model(patch_image)
-                    aggregator.add_batch(output, patch.location.unsqueeze(0))
+                    output = self.model(patch_image)
+                    aggregator.add_batch(output, patch["location"].unsqueeze(0))
 
                 output = aggregator.get_output_tensor().unsqueeze(0)
                 mask = mask.unsqueeze(0)
