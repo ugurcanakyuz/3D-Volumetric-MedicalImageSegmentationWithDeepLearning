@@ -96,11 +96,11 @@ class Trainer3D:
         avg_loss = None
         device = next(self.model.parameters()).device
         epoch_loss = []
+        patch_size = self.patch_size
         running_loss = []  # This is only for loss indicator.
 
         # sampler = tio.data.WeightedSampler(patch_size_, "sampling_map")
         # sampler = tio.data.GridSampler(patch_size=patch_size_)
-        sampler = tio.data.UniformSampler(patch_size=self.patch_size)
 
         prog_bar = tqdm.tqdm(enumerate(self.train_loader),
                              total=int(len(self.train_loader) / self.train_loader.batch_size))
@@ -109,6 +109,8 @@ class Trainer3D:
 
         self.model.train()
         for i, (image, mask) in prog_bar:
+            # patch_size = random.sample(patch_size, len(patch_size))
+            sampler = tio.data.UniformSampler(patch_size=patch_size)
             subject = tio.Subject(
                 image=tio.ScalarImage(tensor=image),
                 mask=tio.LabelMap(tensor=mask),
@@ -130,7 +132,7 @@ class Trainer3D:
                 # Sum losses scores for all predictions.
                 running_loss.append(loss.item())
 
-                if j > 7:
+                if j > 15:
                     break
 
             avg_loss = sum(running_loss) / len(running_loss)
