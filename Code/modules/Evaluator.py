@@ -156,7 +156,12 @@ class Evaluator3D:
 
                 # To calculate Dice Score get softmax applied predicted mask.
                 pred_mask = F.softmax(output, dim=1)
+                # Create one hot encoded mask of original mask.
                 one_hot_mask = create_onehot_mask(pred_mask.shape, mask)
+                # Convert class probabilities to actual class labels.
+                pred_mask = torch.argmax(pred_mask, dim=1, keepdim=True)
+                # Create one hot encoded mask of predicted mask.
+                pred_mask = create_onehot_mask(one_hot_mask.shape, pred_mask)
 
                 scores = calculate_dice_score(pred_mask, one_hot_mask)
                 running_dice_scores.append(scores)
@@ -170,3 +175,27 @@ class Evaluator3D:
             avg_scores = sum(running_dice_scores) / len(running_dice_scores)
 
         return avg_loss, avg_scores
+
+    def predict(self, image):
+        self.model.eval()
+
+        overlap_mode_ = 'crop'
+
+        sampler = tio.data.GridSampler(subject=None, patch_size=self.patch_size)
+
+        with torch.no_grad():
+            subject = tio.Subject(
+                image=tio.ScalarImage(tensor=image),
+            )
+
+            sampler.subject = subject
+            aggregator = tio.data.GridAggregator(sampler, overlap_mode=overlap_mode_)
+
+            for j, patch in enumerate(sampler(subject)):
+                patch_image = patch["image"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
+                output = self.model(patch_image)
+                aggregator.add_batch(output, patch["location"].unsqueeze(0))
+
+            output = aggregator.get_output_tensor().unsqueeze(0)
+
+        return output
