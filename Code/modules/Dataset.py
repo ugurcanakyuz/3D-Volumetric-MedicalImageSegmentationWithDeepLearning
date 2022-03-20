@@ -36,6 +36,8 @@ class FeTADataSet(Dataset):
 
         if set_ == "train":
             train_indexes = split_data.get_train_indexes()
+            train_indexes.pop(6)   # sub-007 has bad resolution
+            train_indexes.pop(8)   # sub-009 has bad resolution
             self.meta_data = self.meta_data.iloc[train_indexes]
         elif set_ == "val":
             val_indexes = split_data.get_val_indexes()
