@@ -327,11 +327,13 @@ class UNet3Dv2(nn.Module):
             nn.Conv3d(in_channels, out_channels // 2, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             # nn.BatchNorm3d(out_channels // 2),
             nn.GroupNorm(8, out_channels // 2),
-            nn.ReLU(inplace=True),
+            # nn.ReLU(inplace=True),
+            nn.Mish(inplace=True),
             nn.Conv3d(out_channels // 2, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             # nn.BatchNorm3d(out_channels),
             nn.GroupNorm(8, out_channels),
-            nn.ReLU(inplace=True)
+            # nn.ReLU(inplace=True)
+            nn.Mish(inplace=True)
         )
 
         return conv
@@ -342,11 +344,13 @@ class UNet3Dv2(nn.Module):
             nn.Conv3d(in_channels, in_channels // 2, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             # nn.BatchNorm3d(out_channels),
             nn.GroupNorm(8, in_channels // 2),
-            nn.ReLU(inplace=True),
+            # nn.ReLU(inplace=True),
+            nn.Mish(inplace=True),
             nn.Conv3d(in_channels // 2, out_channels, kernel_size=kernel_size_, padding="same", padding_mode="zeros"),
             # nn.BatchNorm3d(out_channels),
             nn.GroupNorm(8, out_channels),
-            nn.ReLU(inplace=True)
+            # nn.ReLU(inplace=True)
+            nn.Mish(inplace=True)
         )
 
         return conv
