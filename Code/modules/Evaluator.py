@@ -49,7 +49,7 @@ class Evaluator2D:
                 image = image.to(self.device)  # [bs,x,y,z]
                 mask = mask.to(self.device)  # [bs,x,y,z] Most likely bs=1.
                 mask = torch.unsqueeze(mask, 1)  # [bs, 1, x,y,z]
-                output_mask = torch.Tensor().to(self.device)
+                pred_mask = torch.Tensor().to(self.device)
 
                 for slice_ix in range(0, image.shape[1], self.bs_2d):
                     start = slice_ix
@@ -62,19 +62,27 @@ class Evaluator2D:
                     slice_image = slice_image.view(-1, 1, 256, 256)
 
                     output = self.model(slice_image)
-                    output_mask = torch.cat((output_mask, output))
+                    pred_mask = torch.cat((pred_mask, output))
 
-                output_mask = output_mask.view(mask.shape[0], *output_mask.shape)  # [bs_3d, bs_2d, n_c, x, y]
-                output_mask = output_mask.permute(0, 2, 1, 3, 4).contiguous()   # [bs_3d, n_c, x(bs_2d), y, z]
+                pred_mask = pred_mask.view(mask.shape[0], *pred_mask.shape)  # [bs_3d, bs_2d, n_c, x, y]
+                pred_mask = pred_mask.permute(0, 2, 1, 3, 4).contiguous()   # [bs_3d, n_c, x(bs_2d), y, z]
 
-                val_loss = self.val_criterion(output_mask, mask)
+                val_loss = self.val_criterion(pred_mask, mask)
                 running_losses.append(val_loss.item())
 
                 # To calculate DS, convert raw model outputs to softmax outputs.
-                output_mask = F.softmax(output_mask, dim=1)
-                one_hot_mask = create_onehot_mask(output_mask.shape, mask)
+                pred_mask = F.softmax(pred_mask, dim=1)
 
-                scores = calculate_dice_score(output_mask, one_hot_mask)
+                # Create one hot encoded mask of original mask.
+                one_hot_mask = create_onehot_mask(pred_mask.shape, mask)
+
+                # Convert class probabilities to actual class labels.
+                pred_mask = torch.argmax(pred_mask, dim=1, keepdim=True)
+
+                # Create one hot encoded mask of predicted mask.
+                pred_mask = create_onehot_mask(one_hot_mask.shape, pred_mask)
+
+                scores = calculate_dice_score(pred_mask, one_hot_mask)
                 running_dice_scores += scores
                 count_forward += 1
 
@@ -156,10 +164,13 @@ class Evaluator3D:
 
                 # To calculate Dice Score get softmax applied predicted mask.
                 pred_mask = F.softmax(output, dim=1)
+
                 # Create one hot encoded mask of original mask.
                 one_hot_mask = create_onehot_mask(pred_mask.shape, mask)
+
                 # Convert class probabilities to actual class labels.
                 pred_mask = torch.argmax(pred_mask, dim=1, keepdim=True)
+
                 # Create one hot encoded mask of predicted mask.
                 pred_mask = create_onehot_mask(one_hot_mask.shape, pred_mask)
 
@@ -177,6 +188,18 @@ class Evaluator3D:
         return avg_loss, avg_scores
 
     def predict(self, image):
+        """This methods gets an input image and gives it to model and return predicted mask. Masks are logits.
+
+        Parameters
+        ----------
+        image: torch.Tensor
+            3D image.
+
+        Returns
+        -------
+        output: torch.Tensor
+        """
+
         self.model.eval()
 
         overlap_mode_ = 'crop'
