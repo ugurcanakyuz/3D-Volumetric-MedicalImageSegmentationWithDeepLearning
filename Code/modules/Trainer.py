@@ -53,8 +53,8 @@ class Trainer2D:
 
                 slice_image = image[:, start:stop]
                 slice_mask = mask[:, start:stop]
-                slice_image = slice_image.view(-1, 1, 256, 256)
-                slice_mask = slice_mask.view(-1, 1, 256, 256)
+                slice_image = slice_image.view(-1, 1, *slice_image.shape[-2:])
+                slice_mask = slice_mask.view(-1, 1, *slice_mask.shape[-2:])
 
                 outputs = self.model(slice_image.float())
 
