@@ -284,15 +284,16 @@ class UNet3Dv2(nn.Module):
         self.down_conv4 = self.__double_down_conv(512, 768)
 
         self.up_trans1 = nn.ConvTranspose3d(768, 768, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv1 = self.__double_up_conv(in_channels=1280, out_channels=512)
+        self.up_conv1 = self.__double_up_conv(in_channels=1280, out_channels=768)
 
-        self.up_trans2 = nn.ConvTranspose3d(512, 512, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv2 = self.__double_up_conv(in_channels=768, out_channels=256)
+        self.up_trans2 = nn.ConvTranspose3d(768, 768, kernel_size=up_kernel_size, stride=up_stride)
+        self.up_conv2 = self.__double_up_conv(in_channels=1024, out_channels=512)
 
-        self.up_trans3 = nn.ConvTranspose3d(256, 256, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv3 = self.__double_up_conv(in_channels=384, out_channels=128)
+        self.up_trans3 = nn.ConvTranspose3d(512, 512, kernel_size=up_kernel_size, stride=up_stride)
+        self.up_conv3 = self.__double_up_conv(in_channels=640, out_channels=256)
+        self.up_conv4 = self.__double_up_conv(in_channels=256, out_channels=64)
 
-        self.out = nn.Conv3d(in_channels=128, out_channels=n_classes, kernel_size=(1, 1, 1))
+        self.out = nn.Conv3d(in_channels=64, out_channels=n_classes, kernel_size=(1, 1, 1))
 
     def forward(self, image):
         # bs, c, d, h, w
