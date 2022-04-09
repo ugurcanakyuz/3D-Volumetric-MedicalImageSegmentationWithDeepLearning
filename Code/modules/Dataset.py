@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import os
 
 import nibabel as nib
@@ -8,96 +9,33 @@ from torch.utils.data import Dataset
 from modules.Utils import get_file_names
 
 
-class FeTADataSet(Dataset):
-    """Load FeTA2.1 dataset and splits it into train, validation or test sets.
+class _BaseClass(ABC):
+    """ Base class to create different dataset combinations.
     """
 
-    def __init__(self, set_="train", path="feta_2.1", transform=None):
-        """Creates train, validation or test sets from FeTA2.1 dataset.
-
-        Parameters
-        ----------
-        set_: str
-            "train", "val" or "test"
-        path: str
-            Main folder path of the data.
-        transform: torch or torchio transforms
+    @abstractmethod
+    def get_train_indexes(self):
         """
+        Returns train data indexes.
+        """
+        pass
 
-        self.__path_base = path
-        self.__transform = transform
+    @abstractmethod
+    def get_val_indexes(self):
+        """
+        Returns validation data indexes.
+        """
+        pass
 
-        self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
-        self.__paths_file = get_file_names(self.__path_base)
-
-        # Images below might have bad qualities
-        # "sub-007" and "sub-009"
-        split_data = _SplitDataset(self.meta_data)
-
-        if set_ == "train":
-            train_indexes = split_data.get_train_indexes()
-            train_indexes.pop(6)   # sub-007 has bad resolution
-            train_indexes.pop(8)   # sub-009 has bad resolution
-            self.meta_data = self.meta_data.iloc[train_indexes]
-        elif set_ == "val":
-            val_indexes = split_data.get_val_indexes()
-            self.meta_data = self.meta_data.iloc[val_indexes]
-        else:
-            test_indexes = split_data.get_test_indexes()
-            self.meta_data = self.meta_data.iloc[test_indexes]
-
-        self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
-
-    def __getitem__(self, index):
-        if isinstance(index, int):
-            sub_id = self.meta_data.participant_id[index]
-            mri_image, mri_mask = self.__get_data(sub_id)
-            (x, y, z) = mri_image.shape
-
-            if self.__transform:
-                mri_image = mri_image.view(1, x, y, z)
-                mri_image = self.__transform(mri_image)
-                mri_image = mri_image.view(x, y, z)
-
-            return mri_image, mri_mask
-
-        elif isinstance(index, slice):
-            assert index.stop <= self.meta_data.shape[0], "Index out of range."
-
-            sub_ids = self.meta_data.participant_id[index].tolist()
-            mri_images = []
-            mri_masks = []
-
-            for sub_id in sub_ids:
-                mri_image, mri_mask = self.__get_data(sub_id)
-
-                if self.__transform:
-                    mri_image = mri_image.view(1, *mri_image.shape)
-                    mri_image = self.__transform(mri_image)
-                    mri_image = mri_image.view(mri_image.shape[1:])
-
-                mri_images.append(mri_image)
-                mri_masks.append(mri_mask)
-
-            return tuple(zip(mri_images, mri_masks))
-
-    def __len__(self):
-        return self.meta_data.shape[0]
-
-    def __get_data(self, sub_id):
-        data = self.__paths_file[sub_id]
-        path_image, path_mask = data[0], data[1]
-
-        mri_image = nib.load(path_image).get_fdata()
-        mri_image = torch.Tensor(mri_image)
-
-        mri_mask = nib.load(path_mask).get_fdata()
-        mri_mask = torch.Tensor(mri_mask)
-
-        return mri_image, mri_mask
+    @abstractmethod
+    def get_test_indexes(self):
+        """
+        Returns test data indexes.
+        """
+        pass
 
 
-class _SplitDataset:
+class _BalancedDistribution(_BaseClass):
     """
     There are 80 MRI images of 80 subjects. Gestational ages of subjects ranges 20 weeks to 35 weeks.
     There are Pathological and Neurotypical subjects.
@@ -155,7 +93,14 @@ class _SplitDataset:
 
         train = [item for sub_arr in train for item in sub_arr]
 
-        return sorted(train)
+        train = sorted(train)
+
+        # Images below might have bad qualities
+        # "sub-007" and "sub-009"
+        train.pop(6)  # sub-007 has bad resolution
+        train.pop(7)  # sub-009 has bad resolution
+
+        return train
 
     def get_val_indexes(self):
         validation = [self.index1[5:6], self.index2[16:18], self.index3[6:7], self.index4[3:4], self.index5[5:6],
@@ -172,3 +117,177 @@ class _SplitDataset:
         test = [item for sub_arr in test for item in sub_arr]
 
         return sorted(test)
+
+
+class _EarlyWeeks(_BaseClass):
+    """This class provides the indexes of subjects gestational age < 24.9 weeks.
+    """
+
+    def __init__(self, meta_data):
+        meta_data = meta_data[meta_data["Gestational age"] < 24.9]
+        meta_data = meta_data.sort_values(by="participant_id")
+
+        self.mial_srtk = meta_data[:10]
+        self.simple_irtk = meta_data[10:]
+
+    def get_train_indexes(self):
+        train = [*self.mial_srtk[:8].index.to_list(), *self.simple_irtk[:10].index.to_list()]
+
+        return sorted(train)
+
+    def get_val_indexes(self):
+        val = [*self.mial_srtk[8:9].index.to_list(), *self.simple_irtk[10:12].index.to_list()]
+
+        return sorted(val)
+
+    def get_test_indexes(self):
+        test = [*self.mial_srtk[9:].index.to_list(), *self.simple_irtk[12:].index.to_list()]
+
+        return sorted(test)
+
+
+class _MiddleStage(_BaseClass):
+    """This class provides the indexes of subjects 24.9 <= gestational age < 29.8 weeks .
+    """
+
+    def __init__(self, meta_data):
+        meta_data = meta_data[(24.9 <= meta_data["Gestational age"]) & (meta_data["Gestational age"] < 29.8)]
+        meta_data = meta_data.sort_values(by="participant_id")
+
+        self.mial_srtk = meta_data[:20]
+        self.simple_irtk = meta_data[20:]
+
+    def get_train_indexes(self):
+        train = [*self.mial_srtk[:14].index.to_list(), *self.simple_irtk[:11].index.to_list()]
+
+        return sorted(train)
+
+    def get_val_indexes(self):
+        val = [*self.mial_srtk[14:17].index.to_list(), *self.simple_irtk[11:14].index.to_list()]
+
+        return sorted(val)
+
+    def get_test_indexes(self):
+        test = [*self.mial_srtk[17:].index.to_list(), *self.simple_irtk[14:].index.to_list()]
+
+        return sorted(test)
+
+
+class _LateStage(_BaseClass):
+    """This class provides the indexes of subjects 29.8 weeks <= gestational age .
+    """
+
+    def __init__(self, meta_data):
+        meta_data = meta_data[29.8 <= meta_data["Gestational age"]]
+        meta_data = meta_data.sort_values(by="participant_id")
+
+        self.mial_srtk = meta_data[:8]
+        self.simple_irtk = meta_data[8:]
+
+    def get_train_indexes(self):
+        train = [*self.mial_srtk[:5].index.to_list(), *self.simple_irtk[:6].index.to_list()]
+
+        return sorted(train)
+
+    def get_val_indexes(self):
+        val = [*self.mial_srtk[5:7].index.to_list(), *self.simple_irtk[6:7].index.to_list()]
+
+        return sorted(val)
+
+    def get_test_indexes(self):
+        test = [*self.mial_srtk[7:].index.to_list(), *self.simple_irtk[7:].index.to_list()]
+
+        return sorted(test)
+
+
+class FeTADataSet(Dataset):
+    """Load FeTA2.1 dataset and splits it into train, validation or test sets.
+    """
+
+    def __init__(self, set_="train", path="feta_2.1", transform=None):
+        """Creates train, validation or test sets from FeTA2.1 dataset.
+
+        Parameters
+        ----------
+        set_: str
+            "train", "val" or "test"
+        path: str
+            Main folder path of the data.
+        transform: torch or torchio transforms
+        """
+
+        self.__path_base = path
+        self.__transform = transform
+
+        self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
+        self.__paths_file = get_file_names(self.__path_base)
+
+        # split_data = _BalancedDistribution(self.meta_data)
+
+        self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-007"].index, inplace=True)
+        self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-009"].index, inplace=True)
+        self.meta_data = self.meta_data.sort_values(by="Gestational age").reset_index(drop=True)
+        split_data = _EarlyWeeks(self.meta_data)
+        # split_data = _MiddleStage(self.meta_data)
+        # split_data = _LateStage(self.meta_data)
+
+        if set_ == "train":
+            train_indexes = split_data.get_train_indexes()
+            self.meta_data = self.meta_data.iloc[train_indexes]
+        elif set_ == "val":
+            val_indexes = split_data.get_val_indexes()
+            self.meta_data = self.meta_data.iloc[val_indexes]
+        else:
+            test_indexes = split_data.get_test_indexes()
+            self.meta_data = self.meta_data.iloc[test_indexes]
+
+        self.meta_data = self.meta_data.sort_values(by="participant_id")
+        self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            sub_id = self.meta_data.participant_id[index]
+            mri_image, mri_mask = self.__get_data(sub_id)
+            (x, y, z) = mri_image.shape
+
+            if self.__transform:
+                mri_image = mri_image.view(1, x, y, z)
+                mri_image = self.__transform(mri_image)
+                mri_image = mri_image.view(x, y, z)
+
+            return mri_image, mri_mask
+
+        elif isinstance(index, slice):
+            assert index.stop <= self.meta_data.shape[0], "Index out of range."
+
+            sub_ids = self.meta_data.participant_id[index].tolist()
+            mri_images = []
+            mri_masks = []
+
+            for sub_id in sub_ids:
+                mri_image, mri_mask = self.__get_data(sub_id)
+
+                if self.__transform:
+                    mri_image = mri_image.view(1, *mri_image.shape)
+                    mri_image = self.__transform(mri_image)
+                    mri_image = mri_image.view(mri_image.shape[1:])
+
+                mri_images.append(mri_image)
+                mri_masks.append(mri_mask)
+
+            return tuple(zip(mri_images, mri_masks))
+
+    def __len__(self):
+        return self.meta_data.shape[0]
+
+    def __get_data(self, sub_id):
+        data = self.__paths_file[sub_id]
+        path_image, path_mask = data[0], data[1]
+
+        mri_image = nib.load(path_image).get_fdata()
+        mri_image = torch.Tensor(mri_image)
+
+        mri_mask = nib.load(path_mask).get_fdata()
+        mri_mask = torch.Tensor(mri_mask)
+
+        return mri_image, mri_mask
