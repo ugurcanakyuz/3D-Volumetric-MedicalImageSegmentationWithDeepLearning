@@ -1,0 +1,8 @@
+{
+    "SpatialReference": {
+        "VolumeReference": "sub-CC00050XX01_ses-7201_T2w.nii.gz",
+        "CIFTI_STRUCTURE_CORTEX_LEFT": "sub-CC00050XX01_ses-7201_hemi-left_midthickness.surf.gii",
+        "CIFTI_STRUCTURE_CORTEX_RIGHT": "sub-CC00050XX01_ses-7201_hemi-right_midthickness.surf.gii"
+    },
+    "Description": "Sulcal depth cifti dscalar"
+}

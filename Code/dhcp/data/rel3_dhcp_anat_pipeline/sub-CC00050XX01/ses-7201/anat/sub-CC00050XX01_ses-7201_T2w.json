@@ -1,0 +1,29 @@
+{
+    "Manufacturer": "Philips Medical Systems",
+    "ManufacturersModelName": "Achieva",
+    "SoftwareVersions": "3.2.2\\3.2.2.0",
+    "MagneticFieldStrength": 3,
+    "ReceiveCoilName": "Dual coil",
+    "CoilCombinationMethod": "SENSE",
+    "PulseSequenceType": "TSE TSE MS Cartesian",
+    "SequenceName": "TSE",
+    "PulseSequenceDetails": "FastImgMode: TSE \\/ ScanMode: MS \\/ AcqMode: Cartesian",
+    "NonlinearGradientCorrection": 0,
+    "ParallelAcquisitionTechnique": "SENSE",
+    "EchoTime": 0.156,
+    "FlipAngle": 90,
+    "RepetitionTime": 12,
+    "AcqVoxelSize": [
+        0.8,
+        0.8,
+        0.8
+    ],
+    "RecVoxelSize": [
+        0.5,
+        0.5,
+        0.5
+    ],
+    "SkullStripped": false,
+    "Description": "T2 weighted image",
+    "SpatialReference": "sub-CC00050XX01_ses-7201_T2w.nii.gz"
+}

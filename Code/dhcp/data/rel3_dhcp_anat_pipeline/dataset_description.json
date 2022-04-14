@@ -1,0 +1,16 @@
+{
+    "Name": "dHCP neonatal Structural Derivatives Release 3.0",
+    "BIDSVersion": "1.4.1",
+    "License": "http://www.developingconnectome.org/open-access-dhcp-data-terms-of-use-version-4-0_2019-05-23/",
+    "Authors": [
+        "dHCP Consortium"
+    ],
+    "HowToAcknowledge": "https://biomedia.github.io/dHCP-release-notes/cite.html",
+    "GeneratedBy": [
+        {
+            "Name": "dHCP neonatal structural pipeline",
+            "Version": "v1.3.0",
+            "CodeURL": " https://github.com/BioMedIA/dhcp-structural-pipeline"
+        }
+    ]
+}
