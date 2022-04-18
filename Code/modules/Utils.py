@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -68,8 +69,16 @@ def get_file_names(path_data):
         return zip(iterator, iterator)
 
     paths = {}
-    for image, mask in pairwise(files):
-        paths[image.split(os.sep)[1]] = [image, mask]
+    for data1, data2 in pairwise(files):
+        if re.findall("T2W*", data1):
+            image = data1
+            mask = data2
+        else:
+            image = data2
+            mask = data1
+
+        # After different dataset moved under the 'data' folder index was set to '2'
+        paths[image.split(os.sep)[2]] = [image, mask]
 
     return paths
 
