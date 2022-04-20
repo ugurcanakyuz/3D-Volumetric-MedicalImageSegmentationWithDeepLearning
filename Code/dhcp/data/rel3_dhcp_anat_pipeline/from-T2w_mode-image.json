@@ -1,9 +1,0 @@
-{
-    "Description": "Warp from native structural T2w space to the serag atlas age respective space",
-    "Type": "displacementfield",
-    "Multiplexed": false,
-    "Invertible": true,
-    "FromFile": "",
-    "ToFile": "",
-    "CommandLine": ""
-}
