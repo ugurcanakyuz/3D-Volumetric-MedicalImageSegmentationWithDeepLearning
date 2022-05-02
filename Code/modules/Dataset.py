@@ -60,7 +60,7 @@ class _BalancedDistribution(_BaseClass):
             - Neurotypical: 11 MRI images.  [train:9, val:1, test:1]
             - Pathological: 5 MRI images.   [train:3, val:1, test:1]
 
-    Note: 28 was determined intuitively for diversity gestational weeks and smoother age distribution
+    Note: 28 was determined intuitively for diversity gestational weeks and smoother age distribution.
     """
 
     def __init__(self, meta_data):
@@ -199,6 +199,56 @@ class _LateStage(_BaseClass):
 
         return sorted(test)
 
+class _dHCP(_BaseClass):
+    """
+    This class was created to return dHCP data indexes and to be compatible with Dataset module structure.
+    dHCP dataset contains 738 neonatal subjects. Scan age of MRIs belongs to these subjects range from 26 to 45 weeks.
+    Only 89 of them whose MRIs were recorded under 35 weeks were selected for this experiment. first 70% of them (~69)
+    were selected for training, 15% of them (~13) for validation and 15% of them (~13) for test.
+
+    Methods
+    -------
+    get_train_indexes()
+        Returns the first 63 indexes of subjects.
+    get_val_indexes()
+        Returns the subject indexes between [63, 76).
+    get_test_indexes()
+        Returns the subject indexes between [76, 89).
+    """
+
+    def get_train_indexes(self):
+        return list(range(63))
+
+    def get_val_indexes(self):
+        return list(range(63, 76))
+
+    def get_test_indexes(self):
+        return list(range(76, 89))
+
+
+class _dhcp_feta:
+    def __init__(self, path):
+        folders = os.listdir(path)
+        meta_dhcp = pd.read_csv(os.path.join(path, folders[1], "participants.tsv"), sep="\t")
+        meta_dhcp = meta_dhcp.drop(columns="session_id")
+
+        meta_feta = pd.read_csv(os.path.join(path, folders[0], "participants.tsv"), sep="\t")
+        meta_feta.drop(meta_feta[meta_feta["participant_id"] == "sub-007"].index, inplace=True)
+        meta_feta.drop(meta_feta[meta_feta["participant_id"] == "sub-009"].index, inplace=True)
+        meta_feta = meta_feta.drop(columns="Pathology")
+
+        self.dhcp_feta = pd.concat([meta_dhcp, meta_feta])
+        self.dhcp_feta = self.dhcp_feta.reset_index(drop=True)
+
+    def get_train(self):
+        return self.dhcp_feta[:115]
+
+    def get_val(self):
+        return self.dhcp_feta[115:141]
+
+    def get_test(self):
+        return self.dhcp_feta[141:]
+
 
 class FeTADataSet(Dataset):
     """Load FeTA2.1 dataset and splits it into train, validation or test sets.
@@ -218,18 +268,18 @@ class FeTADataSet(Dataset):
 
         self.__path_base = path
         self.__transform = transform
-
         self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
         self.__paths_file = get_file_names(self.__path_base)
 
+        # self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-007"].index, inplace=True)
+        # self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-009"].index, inplace=True)
+        # self.meta_data = self.meta_data.sort_values(by="Gestational age").reset_index(drop=True)
         # split_data = _BalancedDistribution(self.meta_data)
 
-        self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-007"].index, inplace=True)
-        self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-009"].index, inplace=True)
-        self.meta_data = self.meta_data.sort_values(by="Gestational age").reset_index(drop=True)
-        split_data = _EarlyWeeks(self.meta_data)
+        # split_data = _EarlyWeeks(self.meta_data)
         # split_data = _MiddleStage(self.meta_data)
         # split_data = _LateStage(self.meta_data)
+        split_data = _dHCP()
 
         if set_ == "train":
             train_indexes = split_data.get_train_indexes()
