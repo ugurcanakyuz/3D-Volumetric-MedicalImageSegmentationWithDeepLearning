@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import os
+from enum import Enum
 
 import nibabel as nib
 import pandas as pd
@@ -10,7 +11,7 @@ from modules.Utils import get_file_names
 
 
 class _BaseClass(ABC):
-    """ Base class to create different dataset combinations.
+    """Base class to create different dataset combinations.
     """
 
     @abstractmethod
@@ -35,9 +36,9 @@ class _BaseClass(ABC):
         pass
 
 
-class _BalancedDistribution(_BaseClass):
+class _FeTABalancedDistribution(_BaseClass):
     """
-    There are 80 MRI images of 80 subjects. Gestational ages of subjects ranges 20 weeks to 35 weeks.
+    There are 80 MRI images of 80 subjects in the FeTA2021. Gestational ages of subjects ranges 20 weeks to 35 weeks.
     There are Pathological and Neurotypical subjects.
     First 40 MRI images (sub-001 - sub-040) constructed by mialSRTK method.
     Other 40 MRI images (sub-041 - sub-080) constructed by simpleIRTK method.
@@ -119,6 +120,43 @@ class _BalancedDistribution(_BaseClass):
         return sorted(test)
 
 
+class _Dhcp(_BaseClass):
+    """
+    dHCP dataset contains 738 neonatal subjects. Scan age of MRIs belongs to these subjects range from 26 to 45 weeks.
+    Only 89 of them whose MRIs were recorded under 35 weeks were selected for this experiment. first 70% of them (~69)
+    were selected for training, 15% of them (~13) for validation and 15% of them (~13) for test.
+    """
+
+    def __init__(self, meta_data):
+        self.meta_data = meta_data
+
+    def get_train_indexes(self):
+        return sorted(self.meta_data[:63].index.to_list())
+
+    def get_val_indexes(self):
+        return sorted(self.meta_data[63:76].index.to_list())
+
+    def get_test_indexes(self):
+        return sorted(self.meta_data[76:].index.to_list())
+
+
+class _DhcpFeta(_BaseClass):
+    """
+
+    """
+    def __init__(self, meta_data):
+        self.meta_data = meta_data
+
+    def get_train_indexes(self):
+        return sorted(self.meta_data[:117].index.to_list())
+
+    def get_val_indexes(self):
+        return sorted(self.meta_data[117:142].index.to_list())
+
+    def get_test_indexes(self):
+        return sorted(self.meta_data[142:].index.to_list())
+
+
 class _EarlyWeeks(_BaseClass):
     """This class provides the indexes of subjects gestational age < 24.9 weeks.
     """
@@ -146,7 +184,7 @@ class _EarlyWeeks(_BaseClass):
         return sorted(test)
 
 
-class _MiddleStage(_BaseClass):
+class _MiddleWeeks(_BaseClass):
     """This class provides the indexes of subjects 24.9 <= gestational age < 29.8 weeks .
     """
 
@@ -173,7 +211,7 @@ class _MiddleStage(_BaseClass):
         return sorted(test)
 
 
-class _LateStage(_BaseClass):
+class _LateWeeks(_BaseClass):
     """This class provides the indexes of subjects 29.8 weeks <= gestational age .
     """
 
@@ -199,96 +237,73 @@ class _LateStage(_BaseClass):
 
         return sorted(test)
 
-class _dHCP(_BaseClass):
-    """
-    This class was created to return dHCP data indexes and to be compatible with Dataset module structure.
-    dHCP dataset contains 738 neonatal subjects. Scan age of MRIs belongs to these subjects range from 26 to 45 weeks.
-    Only 89 of them whose MRIs were recorded under 35 weeks were selected for this experiment. first 70% of them (~69)
-    were selected for training, 15% of them (~13) for validation and 15% of them (~13) for test.
 
-    Methods
-    -------
-    get_train_indexes()
-        Returns the first 63 indexes of subjects.
-    get_val_indexes()
-        Returns the subject indexes between [63, 76).
-    get_test_indexes()
-        Returns the subject indexes between [76, 89).
-    """
+class MRIDatasets(Enum):
+    FeTA = "FeTA"
+    dHCP = "dHCP"
+    dHCP_FeTA = "dF"
 
-    def get_train_indexes(self):
-        return list(range(63))
-
-    def get_val_indexes(self):
-        return list(range(63, 76))
-
-    def get_test_indexes(self):
-        return list(range(76, 89))
+    FeTA_BalancedDistribution = "FBD"
+    FeTA_EarlyWeeks = "FEW"
+    FeTA_MiddleWeeks = "FMW"
+    FeTA_LateWeeks = "FLW"
 
 
-class _dhcp_feta:
-    def __init__(self, path):
-        folders = os.listdir(path)
-        meta_dhcp = pd.read_csv(os.path.join(path, folders[1], "participants.tsv"), sep="\t")
-        meta_dhcp = meta_dhcp.drop(columns="session_id")
-
-        meta_feta = pd.read_csv(os.path.join(path, folders[0], "participants.tsv"), sep="\t")
-        meta_feta.drop(meta_feta[meta_feta["participant_id"] == "sub-007"].index, inplace=True)
-        meta_feta.drop(meta_feta[meta_feta["participant_id"] == "sub-009"].index, inplace=True)
-        meta_feta = meta_feta.drop(columns="Pathology")
-
-        self.dhcp_feta = pd.concat([meta_dhcp, meta_feta])
-        self.dhcp_feta = self.dhcp_feta.reset_index(drop=True)
-
-    def get_train(self):
-        return self.dhcp_feta[:115]
-
-    def get_val(self):
-        return self.dhcp_feta[115:141]
-
-    def get_test(self):
-        return self.dhcp_feta[141:]
-
-
-class FeTADataSet(Dataset):
-    """Load FeTA2.1 dataset and splits it into train, validation or test sets.
+class MRIDataset(Dataset):
+    """Load MRI datasets.
     """
 
-    def __init__(self, set_="train", path="feta_2.1", transform=None):
+    def __init__(self, dataset=None, split="train", path="feta_2.1", transform=None):
         """Creates train, validation or test sets from FeTA2.1 dataset.
 
         Parameters
         ----------
-        set_: str
+        dataset: Element of MRIDatasets
+            Dataset class, FeTA, dHCP or others.
+        split: str
             "train", "val" or "test"
         path: str
             Main folder path of the data.
         transform: torch or torchio transforms
         """
 
+        assert dataset is not None, "Pass the dataset code as a MRIDataset value."
+
         self.__path_base = path
         self.__transform = transform
         self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
         self.__paths_file = get_file_names(self.__path_base)
 
-        # self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-007"].index, inplace=True)
-        # self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-009"].index, inplace=True)
-        # self.meta_data = self.meta_data.sort_values(by="Gestational age").reset_index(drop=True)
-        # split_data = _BalancedDistribution(self.meta_data)
+        if dataset is (MRIDatasets.dHCP_FeTA or MRIDatasets.FeTA_EarlyWeeks
+                       or MRIDatasets.FeTA_MiddleWeeks or MRIDatasets.FeTA_LateWeeks):
+            self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-007"].index, inplace=True)
+            self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-009"].index, inplace=True)
+            self.meta_data = self.meta_data.sort_values(by="Gestational age").reset_index(drop=True)
 
-        # split_data = _EarlyWeeks(self.meta_data)
-        # split_data = _MiddleStage(self.meta_data)
-        # split_data = _LateStage(self.meta_data)
-        split_data = _dHCP()
+        if dataset is MRIDatasets.FeTA:
+            assert dataset is not MRIDatasets.FeTA, "This dataset has not been prepared, " \
+                                                    "use FetaBalancedDistribution instead."
+        elif dataset is MRIDatasets.dHCP:
+            dataset_x = _Dhcp(self.meta_data)
+        elif dataset is MRIDatasets.dHCP_FeTA:
+            dataset_x = _DhcpFeta(self.meta_data)
+        elif dataset is MRIDatasets.FeTA_BalancedDistribution:
+            dataset_x = _FeTABalancedDistribution(self.meta_data)
+        elif dataset is MRIDatasets.FeTA_EarlyWeeks:
+            dataset_x = _EarlyWeeks(self.meta_data)
+        elif dataset is MRIDatasets.FeTA_MiddleWeeks:
+            dataset_x = _MiddleWeeks(self.meta_data)
+        elif dataset is MRIDatasets.FeTA_LateWeeks:
+            dataset_x = _LateWeeks(self.meta_data)
 
-        if set_ == "train":
-            train_indexes = split_data.get_train_indexes()
+        if split == "train":
+            train_indexes = dataset_x.get_train_indexes()
             self.meta_data = self.meta_data.iloc[train_indexes]
-        elif set_ == "val":
-            val_indexes = split_data.get_val_indexes()
+        elif split == "val":
+            val_indexes = dataset_x.get_val_indexes()
             self.meta_data = self.meta_data.iloc[val_indexes]
         else:
-            test_indexes = split_data.get_test_indexes()
+            test_indexes = dataset_x.get_test_indexes()
             self.meta_data = self.meta_data.iloc[test_indexes]
 
         self.meta_data = self.meta_data.sort_values(by="participant_id")
