@@ -141,20 +141,22 @@ class _Dhcp(_BaseClass):
 
 
 class _DhcpFeta(_BaseClass):
+    """This class loads the combination of dHCP and FeTA datasets from the participants file which includes subjects
+    of both dataset.
     """
 
-    """
     def __init__(self, meta_data):
-        self.meta_data = meta_data
+        self.feta = _FeTABalancedDistribution(meta_data[:80])
+        self.dhcp = _Dhcp(meta_data[80:])
 
     def get_train_indexes(self):
-        return sorted(self.meta_data[:117].index.to_list())
+        return sorted([*self.feta.get_train_indexes(), *self.dhcp.get_train_indexes()])
 
     def get_val_indexes(self):
-        return sorted(self.meta_data[117:142].index.to_list())
+        return sorted([*self.feta.get_val_indexes(), *self.dhcp.get_val_indexes()])
 
     def get_test_indexes(self):
-        return sorted(self.meta_data[142:].index.to_list())
+        return sorted([*self.feta.get_test_indexes(), *self.dhcp.get_test_indexes()])
 
 
 class _EarlyWeeks(_BaseClass):
@@ -274,11 +276,10 @@ class MRIDataset(Dataset):
         self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
         self.__paths_file = get_file_names(self.__path_base)
 
-        if dataset is (MRIDatasets.dHCP_FeTA or MRIDatasets.FeTA_EarlyWeeks
-                       or MRIDatasets.FeTA_MiddleWeeks or MRIDatasets.FeTA_LateWeeks):
+        if dataset is (MRIDatasets.FeTA_EarlyWeeks or MRIDatasets.FeTA_MiddleWeeks or MRIDatasets.FeTA_LateWeeks):
             self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-007"].index, inplace=True)
             self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-009"].index, inplace=True)
-            self.meta_data = self.meta_data.sort_values(by="Gestational age").reset_index(drop=True)
+            self.meta_data = self.meta_data.sort_values(by="participant_id").reset_index(drop=True)
 
         if dataset is MRIDatasets.FeTA:
             assert dataset is not MRIDatasets.FeTA, "This dataset has not been prepared, " \
