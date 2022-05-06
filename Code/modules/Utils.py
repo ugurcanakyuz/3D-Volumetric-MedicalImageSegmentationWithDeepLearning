@@ -171,11 +171,12 @@ def calculate_dice_score(pred, mask, smooth=1e-5):
     return dice_scores
 
 
-def plot_sub(image, mask, pred_mask=None):
+def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
     """ Plots image, mask and prediction.
 
     Parameters
     ----------
+    fig_size: tuple of ints
     image: torch.Tensor
     mask: torch.Tensor
     pred_mask: torch.Tensor
@@ -185,7 +186,7 @@ def plot_sub(image, mask, pred_mask=None):
     None
     """
 
-    fig = plt.figure(figsize=(13, 13))
+    fig = plt.figure(figsize=fig_size)
     fig.add_subplot(1, 3, 1)
     plt.imshow(image)
     fig.add_subplot(1, 3, 2)
