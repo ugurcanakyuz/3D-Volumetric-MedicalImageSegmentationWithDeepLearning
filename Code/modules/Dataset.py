@@ -6,6 +6,7 @@ import nibabel as nib
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
+import torchio as tio
 
 from modules.Utils import get_file_names
 
@@ -271,6 +272,7 @@ class MRIDataset(Dataset):
 
         assert dataset is not None, "Pass the dataset code as a MRIDataset value."
 
+        dataset_x = None
         self.__path_base = path
         self.__transform = transform
         self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
@@ -314,12 +316,12 @@ class MRIDataset(Dataset):
         if isinstance(index, int):
             sub_id = self.meta_data.participant_id[index]
             mri_image, mri_mask = self.__get_data(sub_id)
-            (x, y, z) = mri_image.shape
 
             if self.__transform:
-                mri_image = mri_image.view(1, x, y, z)
-                mri_image = self.__transform(mri_image)
-                mri_image = mri_image.view(x, y, z)
+                mri_image, mri_mask = self.__apply_transform(mri_image, mri_mask)
+
+            # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
+            mri_image = self.__apply_normalization(mri_image)
 
             return mri_image, mri_mask
 
@@ -334,9 +336,9 @@ class MRIDataset(Dataset):
                 mri_image, mri_mask = self.__get_data(sub_id)
 
                 if self.__transform:
-                    mri_image = mri_image.view(1, *mri_image.shape)
-                    mri_image = self.__transform(mri_image)
-                    mri_image = mri_image.view(mri_image.shape[1:])
+                    mri_image, mri_mask = self.__apply_transform(mri_image, mri_mask)
+                # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
+                mri_image = self.__apply_normalization(mri_image)
 
                 mri_images.append(mri_image)
                 mri_masks.append(mri_mask)
@@ -357,3 +359,23 @@ class MRIDataset(Dataset):
         mri_mask = torch.Tensor(mri_mask)
 
         return mri_image, mri_mask
+
+    @staticmethod
+    def __apply_normalization(mri):
+        preprocessing = tio.ZNormalization(masking_method=tio.ZNormalization.mean)
+        mri = mri.view(1, *mri.shape)
+        mri = preprocessing(mri)
+        mri = mri.view(mri.shape[1:])
+
+        return mri
+
+    def __apply_transform(self, mri, mask):
+        mri = mri.view(1, *mri.shape)
+        mask = mask.view(1, *mask.shape)
+
+        mri, mask = self.__transform((mri, mask))
+
+        mri = mri.view(mri.shape[1:])
+        mask = mask.view(mask.shape[1:])
+
+        return mri, mask
