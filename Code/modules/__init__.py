@@ -1,3 +1,4 @@
+from .DataAugmentations import *
 from .Dataset import MRIDataset, MRIDatasets
 from .Evaluator import Evaluator2D, Evaluator3D
 from .Tensorboard import TensorboardModules
