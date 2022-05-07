@@ -81,7 +81,7 @@ class Trainer2D:
 
 
 class Trainer3D:
-    def __init__(self, model, train_loader, optimizer, criterion, patch_size, total_epochs, scheduler=None):
+    def __init__(self, criterion, model, optimizer, patch_size, total_epochs, train_loader, scheduler=None):
         self.curr_epoch = 0
 
         self.criterion = criterion
