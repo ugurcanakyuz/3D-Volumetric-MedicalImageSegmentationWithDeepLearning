@@ -315,33 +315,35 @@ class MRIDataset(Dataset):
     def __getitem__(self, index):
         if isinstance(index, int):
             sub_id = self.meta_data.participant_id[index]
-            subject = self.__get_data(sub_id)
+            mri_image, mri_mask = self.__get_data(sub_id)
 
             if self.__transform:
-                subject = self.__apply_transform(subject)
+                mri_image, mri_mask = self.__apply_transform(mri_image, mri_mask)
 
             # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-            subject = self.__apply_normalization(subject)
+            mri_image = self.__apply_normalization(mri_image)
 
-            return subject
+            return mri_image, mri_mask
 
         elif isinstance(index, slice):
             assert index.stop <= self.meta_data.shape[0], "Index out of range."
 
             sub_ids = self.meta_data.participant_id[index].tolist()
-            subjects = []
+            mri_images = []
+            mri_masks = []
 
             for sub_id in sub_ids:
-                subject = self.__get_data(sub_id)
+                mri_image, mri_mask = self.__get_data(sub_id)
 
                 if self.__transform:
-                    subject = self.__apply_transform(subject)
+                    mri_image, mri_mask = self.__apply_transform(mri_image, mri_mask)
                 # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-                subject = self.__apply_normalization(subject)
+                mri_image = self.__apply_normalization(mri_image)
 
-                subjects.append(subject)
+                mri_images.append(mri_image)
+                mri_masks.append(mri_mask)
 
-            return subjects
+            return tuple(zip(mri_images, mri_masks))
 
     def __len__(self):
         return self.meta_data.shape[0]
@@ -350,41 +352,30 @@ class MRIDataset(Dataset):
         data = self.__paths_file[sub_id]
         path_image, path_mask = data[0], data[1]
 
-        mri = nib.load(path_image).get_fdata()
-        mri = torch.Tensor(mri)
-        mri = mri.unsqueeze(0)
+        mri_image = nib.load(path_image).get_fdata()
+        mri_image = torch.Tensor(mri_image)
 
-        mask = nib.load(path_mask).get_fdata()
-        mask = torch.Tensor(mask)
-        mask = mask.unsqueeze(0)
+        mri_mask = nib.load(path_mask).get_fdata()
+        mri_mask = torch.Tensor(mri_mask)
 
-        brain = mask.clone()
-        brain[brain > 1] = 1
-
-        shape_ = tuple(mri.shape[1:])
-
-        subject = tio.Subject(mri=tio.ScalarImage(tensor=mri),
-                              mask=tio.LabelMap(tensor=mask),
-                              brain=tio.LabelMap(tensor=brain),
-                              sub_id=sub_id
-                              )
-
-        return subject
+        return mri_image, mri_mask
 
     @staticmethod
-    def __apply_normalization(subject):
+    def __apply_normalization(mri):
         preprocessing = tio.ZNormalization(masking_method=tio.ZNormalization.mean)
-        subject = preprocessing(subject)
+        mri = mri.view(1, *mri.shape)
+        mri = preprocessing(mri)
+        mri = mri.view(mri.shape[1:])
 
-        return subject
+        return mri
 
-    def __apply_transform(self, subject):
-        mri = subject.mri.data
-        mask = subject.mask.data
+    def __apply_transform(self, mri, mask):
+        mri = mri.view(1, *mri.shape)
+        mask = mask.view(1, *mask.shape)
 
         mri, mask = self.__transform((mri, mask))
 
-        subject.mri.data = mri
-        subject.mask.data = mask
+        mri = mri.view(mri.shape[1:])
+        mask = mask.view(mask.shape[1:])
 
-        return subject
+        return mri, mask
