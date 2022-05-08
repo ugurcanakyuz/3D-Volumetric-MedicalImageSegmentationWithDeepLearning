@@ -78,44 +78,6 @@ def create_onehot_mask(pred_shape, mask):
     return mask_onehot
 
 
-def create_patch_indexes(image_shape, patch_sizes):
-    """Creates image patch coordinates for 3D dimension. Image dimensions must be divisible by patch size without
-    remainder.
-
-    Parameters
-    ----------
-    image_shape: tuple
-    patch_sizes: tuple
-
-    Returns
-    -------
-    patches: list
-    """
-
-    x, y, z = image_shape
-    ps_x, ps_y, ps_z = patch_sizes
-    assert x % ps_x == 0, "First dimension of the image must be divisible by patch size without remainder."
-    assert y % ps_y == 0, "Second dimension of the image must be divisible by patch size without remainder."
-    assert z % ps_z == 0, "Third dimension of the image must be divisible by patch size without remainder."
-    px, py, pz = int(x / ps_x), int(y / ps_y), int(z / ps_z)
-
-    sx, sy, sz = 0, 0, 0  # starting points
-
-    patches = []
-
-    for i in range(px):
-        for j in range(py):
-            for u in range(pz):
-                patches.append([[sx, sy, sz], [sx + ps_x, sy + ps_y, sz + ps_z]])
-                sz += ps_z
-            sz = 0
-            sy += ps_y
-        sy = 0
-        sx += ps_x
-
-    return patches
-
-
 def get_file_names(path_data):
     """List the files in subdirectories.
 
@@ -172,13 +134,13 @@ def init_weights_kaiming(m):
         m.bias.data.fill_(0)
 
 
-def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
+def plot_sub(mri, mask, pred_mask=None, fig_size=(13, 13)):
     """ Plots image, mask and prediction.
 
     Parameters
     ----------
     fig_size: tuple of ints
-    image: torch.Tensor
+    mri: torch.Tensor
     mask: torch.Tensor
     pred_mask: torch.Tensor
 
@@ -187,9 +149,14 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
     None
     """
 
+    image = np.rot90(mri)
+    mask = np.rot90(mask)
+    if pred_mask:
+        pred_mask = np.rot90(pred_mask)
+
     fig = plt.figure(figsize=fig_size)
     fig.add_subplot(1, 3, 1)
-    plt.imshow(image)
+    plt.imshow(image, cmap="gray")
     fig.add_subplot(1, 3, 2)
     plt.imshow(mask)
 
