@@ -3,7 +3,8 @@ import tqdm
 
 
 class Trainer2D:
-    """This class consist of fit method for training. fit method train the model with given data.
+    """!!! Warning !!! This class has not been updated after torchio implementations.
+    This class consist of fit method for training. fit method train the model with given data.
 
     Example:
         trainer = Trainer2D(model, train_loader, optimizer, criterion, num_epochs, scheduler)
@@ -108,18 +109,13 @@ class Trainer3D:
         prog_bar.set_postfix_str(f'Loss: {avg_loss}')
 
         self.model.train()
-        for i, (image, mask) in prog_bar:
+        for i, subject in prog_bar:
             # patch_size = random.sample(patch_size, len(patch_size))
             sampler = tio.data.UniformSampler(patch_size=patch_size)
-            subject = tio.Subject(
-                image=tio.ScalarImage(tensor=image),
-                mask=tio.LabelMap(tensor=mask),
-                # sampling_map=tio.Image(tensor=mask, type=tio.SAMPLING_MAP),       # Mask is more stable for sampling.
-            )
 
             for j, patch in enumerate(sampler(subject)):
                 patch_mask = patch["mask"].data.unsqueeze(1).to(device)  # [bs,1,x,y,z]
-                patch_image = patch["image"].data
+                patch_image = patch["mri"].data
                 patch_image = patch_image.unsqueeze(1).to(device)  # [bs,1,x,y,z]
 
                 outputs = self.model(patch_image.float())

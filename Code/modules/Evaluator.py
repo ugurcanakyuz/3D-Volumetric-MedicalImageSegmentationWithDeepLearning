@@ -7,7 +7,8 @@ from modules.Utils import calculate_dice_score, create_onehot_mask
 
 
 class Evaluator2D:
-    """This class consist of evaluation method. Evaluate method calculates dice score per channel.
+    """ !!! Warning !!! This class has not been updated after tqdm and torchio implementations.
+    This class consist of evaluation method. Evaluate method calculates dice score per channel.
 
     Example:
         evaluator = Evaluator2D(model, test_loader)
@@ -109,7 +110,7 @@ class Evaluator3D:
 
         out_channels = model.out.out_channels
         sample = next(iter(val_loader))
-        shape = tuple(sample[0].shape[1:])
+        shape = tuple(sample["mri"]["data"].shape[2:])
         self.output_shape = (val_loader.batch_size, out_channels, *shape)
 
     def evaluate(self):
@@ -140,16 +141,12 @@ class Evaluator3D:
 
         self.model.eval()
         with torch.no_grad():
-            for i, (image, mask) in prog_bar:
-                subject = tio.Subject(
-                    image=tio.ScalarImage(tensor=image),
-                    mask=tio.LabelMap(tensor=mask),
-                )
+            for i, subject in prog_bar:
                 sampler.subject = subject
                 aggregator = tio.data.GridAggregator(sampler, overlap_mode=overlap_mode_)
 
                 for j, patch in enumerate(sampler(subject)):
-                    patch_image = patch["image"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
+                    patch_image = patch["mri"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
 
                     output = self.model(patch_image)
                     aggregator.add_batch(output, patch["location"].unsqueeze(0))
