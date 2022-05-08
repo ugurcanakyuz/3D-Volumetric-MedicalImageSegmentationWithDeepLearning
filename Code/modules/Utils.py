@@ -206,7 +206,7 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
 
 
 def save_nii(folder, file_name, data):
-    """Saves mri or mask data as nii.gz file. First converts ndarray to Nifti1Image, then save it as nii.gz. file.
+    """Saves MRI or mask data as nii.gz file. First converts ndarray to Nifti1Image, then save it as nii.gz. file.
 
     Parameters
     ----------
@@ -229,13 +229,13 @@ def save_nii(folder, file_name, data):
     try:
         data = nib.Nifti1Image(data, np.eye(4))
     except Exception as e:
-        print(str(e))
+        print(f"Conversion error: {e}")
 
     # Save data in format of Nifti1Image.
     try:
         nib.save(data, full_path)
     except Exception as e:
-        print(str(e))
+        print(f"Saving error: {e}")
 
 
 class EarlyStopping:
