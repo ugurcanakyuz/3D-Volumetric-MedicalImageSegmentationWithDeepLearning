@@ -33,6 +33,24 @@ def apply_transform(mri, mask, transform):
     return mri, mask
 
 
+class Mask:
+    """Sets voxel outside of brain region the background value. Similar to torchio.Mask.
+       See details: https://torchio.readthedocs.io/transforms/preprocessing.html#mask
+       Some of the data are not correctly labelled, thus, this problem can be solved with masking operation.
+
+    """
+    def __call__(self, sample):
+        mri, mask = sample
+
+        # Get only brain region.
+        brain = mask.clone()
+        brain[brain > 1] = 1
+
+        mri[brain == 0] = mri.min()
+
+        return mri, mask
+
+
 class RandomAffine:
     """Apply a random affine transformation and resample mri and mask.
     See details: https://torchio.readthedocs.io/transforms/augmentation.html#randomaffine
