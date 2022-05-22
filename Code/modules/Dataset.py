@@ -37,6 +37,52 @@ class _BaseClass(ABC):
         pass
 
 
+class _FeTA(_BaseClass):
+    def __init__(self, meta_data, cv):
+        """5-Fold Cross Validation applied.
+        | - 16 - | - 16 - | - 16 - | - 16 - | - 16 -|
+
+        Parameters
+        ----------
+        meta_data: pandas.DataFramer
+        cv: str
+
+        Returns
+        -------
+        None.
+        """
+
+        self.meta_data = meta_data
+
+        if cv == "cv1":
+            self.pt1 = 64
+            self.pt2 = 80
+        elif cv == "cv2":
+            self.pt1 = 48
+            self.pt2 = 64
+        elif cv == "cv3":
+            self.pt1 = 32
+            self.pt2 = 48
+        elif cv == "cv4":
+            self.pt1 = 16
+            self.pt2 = 32
+        else:
+            self.pt1 = 0
+            self.pt2 = 16
+
+        self.train = pd.concat([self.meta_data[:self.pt1], self.meta_data[self.pt2:]])
+        self.val = self.meta_data[self.pt1:self.pt2]
+
+    def get_train_indexes(self):
+        return self.train.index.to_list()
+
+    def get_val_indexes(self):
+        return self.val.index.to_list()
+
+    def get_test_indexes(self):
+        assert False, "This dataset implemented for cross-validation. There are only training and validation sets."
+
+
 class _FeTABalancedDistribution(_BaseClass):
     """
     There are 80 MRI images of 80 subjects in the FeTA2021. Gestational ages of subjects ranges 20 weeks to 35 weeks.
@@ -256,7 +302,7 @@ class MRIDataset(Dataset):
     """Load MRI datasets.
     """
 
-    def __init__(self, dataset=None, split="train", path="feta_2.1", transform=None):
+    def __init__(self, dataset=None, split="train", path="feta_2.1", cv="cv1",  transform=None):
         """Creates train, validation or test sets from FeTA2.1 dataset.
 
         Parameters
@@ -267,6 +313,9 @@ class MRIDataset(Dataset):
             "train", "val" or "test"
         path: str
             Main folder path of the data.
+        cv: str
+            Fold code of the cross-validation like CV1, CV2, CV3, CV4, and CV5 for 5-fold cross-validation.
+            Warnings: Only implemented for FeTA dataset.
         transform: torch or torchio transforms
         """
 
@@ -284,8 +333,7 @@ class MRIDataset(Dataset):
             self.meta_data = self.meta_data.sort_values(by="participant_id").reset_index(drop=True)
 
         if dataset is MRIDatasets.FeTA:
-            assert dataset is not MRIDatasets.FeTA, "This dataset has not been prepared, " \
-                                                    "use FetaBalancedDistribution instead."
+            dataset_x = _FeTA(self.meta_data, cv)
         elif dataset is MRIDatasets.dHCP:
             dataset_x = _Dhcp(self.meta_data)
         elif dataset is MRIDatasets.dHCP_FeTA:
