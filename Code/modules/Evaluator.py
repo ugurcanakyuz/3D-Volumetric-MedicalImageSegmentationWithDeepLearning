@@ -185,7 +185,7 @@ class Evaluator3D:
             avg_loss = sum(epoch_loss) / len(epoch_loss)
             avg_scores = sum(running_dice_scores) / len(running_dice_scores)
 
-        return avg_loss, avg_scores
+        return avg_loss, avg_scores, running_dice_scores
 
     def predict(self, image):
         """This methods gets an input image and gives it to model and return predicted mask. Masks are logits.
