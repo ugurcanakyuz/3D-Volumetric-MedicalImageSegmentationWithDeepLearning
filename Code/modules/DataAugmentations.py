@@ -102,8 +102,6 @@ class RandomMotion:
     """
 
     def __init__(self, degrees=0, num_transforms=2, translations=0.5):
-        assert False, "Needs to be fixed. Don't use it."
-
         self.degrees = degrees
         self.translation = translations
         self.num_transforms = num_transforms
