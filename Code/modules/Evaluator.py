@@ -121,15 +121,17 @@ class Evaluator3D:
 
         Returns
         -------
-        avg_scores: float
-            Average dice score for each class.
+        avg_loss: float
+            Average loss of the validation set.
+        dice_scores: Tensor
+            Dice scores of each subject.
         """
 
         avg_val_loss = None
         epoch_loss = []
         overlap_mode_ = 'crop'
         running_losses = []
-        running_dice_scores = []
+        dice_scores = []
 
         sampler = tio.data.GridSampler(subject=None, patch_size=self.patch_size)
 
@@ -175,7 +177,7 @@ class Evaluator3D:
                 pred_mask = create_onehot_mask(one_hot_mask.shape, pred_mask)
 
                 scores = calculate_dice_score(pred_mask, one_hot_mask)
-                running_dice_scores.append(scores)
+                dice_scores.append(scores)
 
                 avg_loss = sum(running_losses) / len(running_losses)
                 running_losses = []
@@ -183,9 +185,8 @@ class Evaluator3D:
                 prog_bar.set_postfix_str(f'Loss: {sum(epoch_loss) / len(epoch_loss):.4f}')
 
             avg_loss = sum(epoch_loss) / len(epoch_loss)
-            avg_scores = sum(running_dice_scores) / len(running_dice_scores)
 
-        return avg_loss, avg_scores, running_dice_scores
+        return avg_loss, dice_scores
 
     def predict(self, image):
         """This methods gets an input image and gives it to model and return predicted mask. Masks are logits.
