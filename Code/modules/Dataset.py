@@ -360,6 +360,9 @@ class MRIDataset(Dataset):
         self.meta_data = self.meta_data.sort_values(by="participant_id")
         self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
 
+        self.preprocessing = tio.HistogramStandardization('t2_feta_landmarks.pth',
+                                                          masking_method=tio.ZNormalization.mean)
+
     def __getitem__(self, index):
         if isinstance(index, int):
             sub_id = self.meta_data.participant_id[index]
@@ -369,7 +372,8 @@ class MRIDataset(Dataset):
                 mri_image, mri_mask = self.__apply_transform(mri_image, mri_mask)
 
             # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-            mri_image = self.__apply_normalization(mri_image)
+            # mri_image = self.__apply_normalization(mri_image)
+            mri_image = self.__apply_histogram_equalization(mri_image)
 
             return mri_image, mri_mask
 
@@ -386,7 +390,8 @@ class MRIDataset(Dataset):
                 if self.__transform:
                     mri_image, mri_mask = self.__apply_transform(mri_image, mri_mask)
                 # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-                mri_image = self.__apply_normalization(mri_image)
+                #mri_image = self.__apply_normalization(mri_image)
+                mri_image = self.__apply_histogram_equalization(mri_image)
 
                 mri_images.append(mri_image)
                 mri_masks.append(mri_mask)
@@ -414,6 +419,27 @@ class MRIDataset(Dataset):
         mri = mri.view(1, *mri.shape)
         mri = preprocessing(mri)
         mri = mri.view(mri.shape[1:])
+
+        return mri
+
+    def __apply_histogram_equalization(self, mri):
+        """See: https://torchio.readthedocs.io/transforms/preprocessing.html#histogramstandardization
+
+        Parameters
+        ----------
+        mri: torch.Tensor
+            (x, y, z)
+
+        Returns
+        -------
+        mri: torch.Tensor
+            (x, y, z)
+        """
+
+        subject = tio.Subject(t2=tio.ScalarImage(tensor=mri.unsqueeze(0)))
+        subject = self.preprocessing(subject)
+        mri = subject.t2.data
+        mri = mri.squeeze(0)
 
         return mri
 
