@@ -6,8 +6,8 @@ import nibabel as nib
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
-import torchio as tio
 
+from .Transforms import Preprocessing as Pre
 from modules.Utils import get_file_names
 
 
@@ -360,8 +360,8 @@ class MRIDataset(Dataset):
         self.meta_data = self.meta_data.sort_values(by="participant_id")
         self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
 
-        self.preprocessing = tio.HistogramStandardization('t2_feta_landmarks.pth',
-                                                          masking_method=tio.ZNormalization.mean)
+        # Histogram equalization made training slow and didn't improve dice score.
+        # self.HE = Pre('t2_feta_landmarks.pth')
 
     def __getitem__(self, index):
         if isinstance(index, int):
@@ -372,8 +372,8 @@ class MRIDataset(Dataset):
                 mri, mask = self.__apply_transform(mri, mask)
 
             # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-            # mri = self.__apply_normalization(mri)
-            mri = self.__apply_histogram_equalization(mri)
+            mri = Pre.apply_normalization(mri)
+            # mri = HE.apply_histogram_equalization(mri)
 
             return mri, mask
 
@@ -389,9 +389,10 @@ class MRIDataset(Dataset):
 
                 if self.__transform:
                     mri, mask = self.__apply_transform(mri, mask)
+
                 # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-                # mri = self.__apply_normalization(mri)
-                mri = self.__apply_histogram_equalization(mri)
+                mri = Pre.apply_normalization(mri)
+                # mri = HE.apply_histogram_equalization(mri)
 
                 mris.append(mri)
                 masks.append(mask)
@@ -412,36 +413,6 @@ class MRIDataset(Dataset):
         mask = torch.Tensor(mask)
 
         return mri, mask
-
-    @staticmethod
-    def __apply_normalization(mri):
-        preprocessing = tio.ZNormalization(masking_method=tio.ZNormalization.mean)
-        mri = mri.view(1, *mri.shape)
-        mri = preprocessing(mri)
-        mri = mri.view(mri.shape[1:])
-
-        return mri
-
-    def __apply_histogram_equalization(self, mri):
-        """See: https://torchio.readthedocs.io/transforms/preprocessing.html#histogramstandardization
-
-        Parameters
-        ----------
-        mri: torch.Tensor
-            (x, y, z)
-
-        Returns
-        -------
-        mri: torch.Tensor
-            (x, y, z)
-        """
-
-        subject = tio.Subject(t2=tio.ScalarImage(tensor=mri.unsqueeze(0)))
-        subject = self.preprocessing(subject)
-        mri = subject['t2'].data
-        mri = mri.squeeze(0)
-
-        return mri
 
     def __apply_transform(self, mri, mask):
         mri = mri.view(1, *mri.shape)
