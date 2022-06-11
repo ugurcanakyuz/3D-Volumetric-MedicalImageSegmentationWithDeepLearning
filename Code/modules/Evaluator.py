@@ -109,7 +109,7 @@ class Evaluator3D:
 
         out_channels = model.out.out_channels
         sample = next(iter(val_loader))
-        shape = tuple(sample[0].shape[1:])
+        shape = tuple(sample['mri']['data'].shape[1:])
         self.output_shape = (val_loader.batch_size, out_channels, *shape)
 
     def evaluate(self):
@@ -142,22 +142,22 @@ class Evaluator3D:
 
         self.model.eval()
         with torch.no_grad():
-            for i, (image, mask) in prog_bar:
-                subject = tio.Subject(
-                    image=tio.ScalarImage(tensor=image),
-                    mask=tio.LabelMap(tensor=mask),
-                )
+            for i, subject in prog_bar:
+                mri = subject['mri']['data']
+                mask = subject['mask']['data']
+                subject = tio.Subject(image=tio.ScalarImage(tensor=mri.squeeze(0)),
+                                      mask=tio.LabelMap(tensor=mask.squeeze(0)))
                 sampler.subject = subject
                 aggregator = tio.data.GridAggregator(sampler, overlap_mode=overlap_mode_)
 
                 for j, patch in enumerate(sampler(subject)):
-                    patch_image = patch["image"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
+                    patch_mri = patch["image"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
 
-                    output = self.model(patch_image)
+                    output = self.model(patch_mri.float())
                     aggregator.add_batch(output, patch["location"].unsqueeze(0))
 
                 output = aggregator.get_output_tensor().unsqueeze(0)
-                mask = mask.unsqueeze(0)
+                mask = mask
 
                 # Validation loss calculated on the aggregated so whole predicted mask.
                 # Criterion accepts raw logits so softmax has not been applied to predicted mask yet.
