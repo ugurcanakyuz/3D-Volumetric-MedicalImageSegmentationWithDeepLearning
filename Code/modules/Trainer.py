@@ -1,4 +1,3 @@
-import torchio as tio
 import tqdm
 
 
@@ -96,49 +95,31 @@ class Trainer3D:
         avg_loss = None
         device = next(self.model.parameters()).device
         epoch_loss = []
-        patch_size = self.patch_size
         running_loss = []  # This is only for loss indicator.
 
-        # sampler = tio.data.WeightedSampler(patch_size_, "sampling_map")
-        # sampler = tio.data.GridSampler(patch_size=patch_size_)
-
         prog_bar = tqdm.tqdm(enumerate(self.train_loader),
-                             total=int(len(self.train_loader) / self.train_loader.batch_size))
+                             total=int((len(self.train_loader)) / self.train_loader.batch_size))
         prog_bar.set_description(f"Epoch [{self.curr_epoch + 1}/{self.total_epochs}]")
         prog_bar.set_postfix_str(f'Loss: {avg_loss}')
 
         self.model.train()
-        for i, (image, mask) in prog_bar:
-            # patch_size = random.sample(patch_size, len(patch_size))
-            sampler = tio.data.UniformSampler(patch_size=patch_size)
-            subject = tio.Subject(
-                image=tio.ScalarImage(tensor=image),
-                mask=tio.LabelMap(tensor=mask),
-                # sampling_map=tio.Image(tensor=mask, type=tio.SAMPLING_MAP),       # Mask is more stable for sampling.
-            )
+        for i, subject in prog_bar:
+            patch_mri = subject['mri']['data'].to(device)  # [bs,1,x,y,z]
+            patch_mask = subject['mask']['data'].to(device)  # [bs,1,x,y,z]
 
-            for j, patch in enumerate(sampler(subject)):
-                patch_mask = patch["mask"].data.unsqueeze(1).to(device)  # [bs,1,x,y,z]
-                patch_image = patch["image"].data
-                patch_image = patch_image.unsqueeze(1).to(device)  # [bs,1,x,y,z]
+            outputs = self.model(patch_mri.float())
+            loss = self.criterion(outputs, patch_mask)
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+            running_loss.append(loss.item())
 
-                outputs = self.model(patch_image.float())
-                loss = self.criterion(outputs, patch_mask)
-
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-
+            if (i+1) % 8 == 0:  # 8 is number of patches per volume
                 # Sum losses scores for all predictions.
-                running_loss.append(loss.item())
-
-                if j > 7:
-                    break
-
-            avg_loss = sum(running_loss) / len(running_loss)
-            running_loss = []
-            epoch_loss.append(avg_loss)
-            prog_bar.set_postfix_str(f'Loss: {sum(epoch_loss) / len(epoch_loss):.4f}')
+                avg_loss = sum(running_loss) / len(running_loss)
+                running_loss = []
+                epoch_loss.append(avg_loss)
+                prog_bar.set_postfix_str(f'Loss: {sum(epoch_loss) / len(epoch_loss):.4f}')
 
         self.curr_epoch += 1
 
