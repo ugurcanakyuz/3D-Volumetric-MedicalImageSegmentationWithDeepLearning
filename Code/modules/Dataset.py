@@ -6,6 +6,7 @@ import nibabel as nib
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
+import torchio as tio
 
 from .Transforms import Preprocessing as Pre
 from modules.Utils import get_file_names
@@ -302,8 +303,9 @@ class MRIDataset(Dataset):
     """Load MRI datasets.
     """
 
-    def __init__(self, dataset=None, split="train", path="feta_2.1", cv="cv1",  transform=None):
-        """Creates train, validation or test sets from FeTA2.1 dataset.
+    def __init__(self, dataset=None, split="train", path="feta_2.1",
+                 cv="cv1", patch_size=(128, 128, 128), transform=None):
+        """Creates train, validation or test sets from FeTA2.1 and/or dHCP dataset.
 
         Parameters
         ----------
@@ -360,67 +362,28 @@ class MRIDataset(Dataset):
         self.meta_data = self.meta_data.sort_values(by="participant_id")
         self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
 
+        self.dataset = tio.SubjectsDataset(self.__get_subjects(), transform=self.__transform)
+
         # Histogram equalization made training slow and didn't improve dice score.
         # self.HE = Pre('t2_feta_landmarks.pth')
 
     def __getitem__(self, index):
-        if isinstance(index, int):
-            sub_id = self.meta_data.participant_id[index]
-            mri, mask = self.__get_data(sub_id)
+        subject = self.dataset[index]
 
-            if self.__transform:
-                mri, mask = self.__apply_transform(mri, mask)
-
-            # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-            mri = Pre.apply_normalization(mri)
-            # mri = HE.apply_histogram_equalization(mri)
-
-            return mri, mask
-
-        elif isinstance(index, slice):
-            assert index.stop <= self.meta_data.shape[0], "Index out of range."
-
-            sub_ids = self.meta_data.participant_id[index].tolist()
-            mris = []
-            masks = []
-
-            for sub_id in sub_ids:
-                mri, mask = self.__get_data(sub_id)
-
-                if self.__transform:
-                    mri, mask = self.__apply_transform(mri, mask)
-
-                # Apply ZNormalization(see:https://torchio.readthedocs.io/transforms/preprocessing.html#znormalization).
-                mri = Pre.apply_normalization(mri)
-                # mri = HE.apply_histogram_equalization(mri)
-
-                mris.append(mri)
-                masks.append(mask)
-
-            return tuple(zip(mris, masks))
+        return subject
 
     def __len__(self):
         return self.meta_data.shape[0]
 
-    def __get_data(self, sub_id):
-        data = self.__paths_file[sub_id]
-        path_mri, path_mask = data[0], data[1]
+    def __get_subjects(self):
+        subjects = []
+        for index, row in self.meta_data.iterrows():
+            path_mri, path_mask = self.__paths_file[row.participant_id]
+            subject = tio.Subject(mri=tio.ScalarImage(path_mri),
+                                  mask=tio.LabelMap(path_mask),
+                                  sub_id=row.participant_id
+                                  )
 
-        mri = nib.load(path_mri).get_fdata()
-        mri = torch.Tensor(mri)
+            subjects.append(subject)
 
-        mask = nib.load(path_mask).get_fdata()
-        mask = torch.Tensor(mask)
-
-        return mri, mask
-
-    def __apply_transform(self, mri, mask):
-        mri = mri.view(1, *mri.shape)
-        mask = mask.view(1, *mask.shape)
-
-        mri, mask = self.__transform((mri, mask))
-
-        mri = mri.view(mri.shape[1:])
-        mask = mask.view(mask.shape[1:])
-
-        return mri, mask
+        return subjects
