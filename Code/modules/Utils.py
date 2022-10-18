@@ -122,7 +122,7 @@ def get_file_names(path_data):
     Parameters
     ----------
     path_data: str
-        Path of the data folder.
+        Path of the Data folder.
 
     Returns
     -------
@@ -148,8 +148,7 @@ def get_file_names(path_data):
             image = data2
             mask = data1
 
-        # After different dataset moved under the 'data' folder index was set to '2'
-        paths[image.split(os.sep)[2]] = [image, mask]
+        paths[image.split(os.sep)[-3]] = [image, mask]
 
     return paths
 
@@ -206,16 +205,16 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
 
 
 def save_nii(folder, file_name, data):
-    """Saves MRI or mask data as nii.gz file. First converts ndarray to Nifti1Image, then save it as nii.gz. file.
+    """Saves MRI or mask Data as nii.gz file. First converts ndarray to Nifti1Image, then save it as nii.gz. file.
 
     Parameters
     ----------
     folder: str
-        What folder data will be saved under.
+        What folder Data will be saved under.
     file_name: str
         File name without '.nii.gz' extension.
     data: ndarray
-        3 dimension (x, y, z,) MRI or mask data.
+        3 dimension (x, y, z,) MRI or mask Data.
 
     Returns
     -------
@@ -231,7 +230,7 @@ def save_nii(folder, file_name, data):
     except Exception as e:
         print(f"Conversion error: {e}")
 
-    # Save data in format of Nifti1Image.
+    # Save Data in format of Nifti1Image.
     try:
         nib.save(data, full_path)
     except Exception as e:
@@ -282,7 +281,7 @@ class LearningRateFinder:
         curr_lr = min_lr
 
         while curr_lr <= max_lr:
-            # One forward pass for all training data.
+            # One forward pass for all training Data.
             avg_train_loss = self.trainer.fit()
 
             self.lrs.append(curr_lr)
