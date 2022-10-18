@@ -8,7 +8,7 @@ from modules.Utils import calculate_dice_score, create_onehot_mask
 
 
 class Evaluator2D:
-    """Evaluator of 2D data. Loaded 3D MRI data slices into 2D stacks of batches and
+    """Evaluator of 2D Data. Loaded 3D MRI Data slices into 2D stacks of batches and
     calculates loss and DSC of batches per class.
 
     Example:
@@ -22,11 +22,11 @@ class Evaluator2D:
         Parameters
         ----------
         criterion: modules.LossFunctions
-            To calculate loss value of 2D data.
+            To calculate loss value of 2D Data.
         model: modules.UNet
             2D UNet model implemented in UNet.
         val_loader: DataLoader
-            3D data loader.
+            3D Data loader.
 
         Returns
         -------
@@ -134,11 +134,11 @@ class Evaluator3D:
         Parameters
         ----------
         criterion: modules.LossFunctions
-            To calculate loss value of 3D data.
+            To calculate loss value of 3D Data.
         model: modules.UNet
             3D UNet model implemented in UNet.
         val_loader: DataLoader
-            3D data loader.
+            3D Data loader.
 
         Returns
         -------

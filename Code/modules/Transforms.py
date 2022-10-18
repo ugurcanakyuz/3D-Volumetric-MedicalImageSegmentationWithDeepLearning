@@ -44,7 +44,7 @@ class Preprocessing:
 class Mask:
     """Sets voxel outside of brain region the background value. Similar to torchio.Mask.
        See details: https://torchio.readthedocs.io/transforms/preprocessing.html#mask
-       Some data are not correctly labelled, this problem can be solved with masking operation.
+       Some Data are not correctly labelled, this problem can be solved with masking operation.
 
     """
     def __call__(self, sample):
@@ -62,7 +62,7 @@ class Mask:
 class RandomAffine:
     """Apply a random affine transformation and resample mri and mask.
     See details: https://torchio.readthedocs.io/transforms/augmentation.html#randomaffine
-    FeTA and dHCP datasets have already transformed to isotropic data with 0.5x0.5x0.5mm resolutions.
+    FeTA and dHCP datasets have already transformed to isotropic Data with 0.5x0.5x0.5mm resolutions.
     Therefore, 'isotropic' and 'translation' parameters was set manually.
     """
 
@@ -104,7 +104,7 @@ class RandomElasticDeformation:
 
 
 class RandomMotion:
-    """Simulate random motion artifacts for data augmentation to mri and mask.
+    """Simulate random motion artifacts for Data augmentation to mri and mask.
     See details: https://torchio.readthedocs.io/transforms/augmentation.html#randommotion
     """
 

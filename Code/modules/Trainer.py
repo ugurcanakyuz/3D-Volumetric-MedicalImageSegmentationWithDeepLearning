@@ -4,7 +4,7 @@ import tqdm
 
 
 class Trainer2D:
-    """Trainer for 2D data and models. Loaded 3D MRI data are sliced into 2D stacks of batches
+    """Trainer for 2D Data and models. Loaded 3D MRI Data are sliced into 2D stacks of batches
     and loss are calculated in the fit() method.
 
     Example:
@@ -18,7 +18,7 @@ class Trainer2D:
         Parameters
         ----------
         criterion: modules.LossFunction
-            To calculate loss value of 2D data.
+            To calculate loss value of 2D Data.
         model: modules.UNet
             2D UNet model implemented in UNet.
         optimizer: torch.optim.SGD or others
@@ -26,7 +26,7 @@ class Trainer2D:
         total_epochs: int
             Total epoch counts of the training.
         train_loader: DataLoader
-            3D data loader.
+            3D Data loader.
         scheduler: torch.optim.lr_scheduler.StepLR
             Learning rate scheduler object of the torch.optim.lr_scheduler module.
 
@@ -45,7 +45,7 @@ class Trainer2D:
         self.train_loader = train_loader
 
     def fit(self):
-        """Fit the model to the 2D data.
+        """Fit the model to the 2D Data.
 
         Returns
         -------
@@ -66,8 +66,8 @@ class Trainer2D:
 
         self.model.train()
         for i, subject in prog_bar:
-            mri = subject['mri']['data'].to(device)              # [bs,1,x,y,z], bs=1 due to memory limit
-            mask = subject['mask']['data'].to(device)            # [bs,1,x,y,z], bs=1 due to memory limit
+            mri = subject['mri']['Data'].to(device)              # [bs,1,x,y,z], bs=1 due to memory limit
+            mask = subject['mask']['Data'].to(device)            # [bs,1,x,y,z], bs=1 due to memory limit
 
             # Slice 3D image. It's like splitting 3D images into batches.
             for slice_ix in range(0, mri.shape[2], bs_2d):
@@ -104,7 +104,7 @@ class Trainer2D:
 
 
 class Trainer3D:
-    """Trainer for 3D data and models.
+    """Trainer for 3D Data and models.
 
     Example:
         trainer = Trainer2D(criterion, model, optimizer, total_epochs, train_loader)
@@ -117,7 +117,7 @@ class Trainer3D:
         Parameters
         ----------
         criterion: modules.LossFunction
-            To calculate loss value of 2D data.
+            To calculate loss value of 2D Data.
         model: modules.UNet
             3D UNet model implemented in UNet.
         optimizer: torch.optim.SGD or others
@@ -125,7 +125,7 @@ class Trainer3D:
         total_epochs: int
             Total epoch counts of the training.
         train_loader: DataLoader
-            3D data loader.
+            3D Data loader.
         scheduler: torch.optim.lr_scheduler.StepLR
             Learning rate scheduler object of the torch.optim.lr_scheduler module.
 
@@ -144,7 +144,7 @@ class Trainer3D:
         self.train_loader = train_loader
 
     def fit(self):
-        """Fit the model to the 3D data.
+        """Fit the model to the 3D Data.
 
         Returns
         -------

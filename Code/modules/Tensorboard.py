@@ -6,7 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 class TensorboardModules:
-    """This class consists of methods that allow adding data into Tensorboard.
+    """This class consists of methods that allow adding Data into Tensorboard.
     """
 
     def __init__(self, log_dir="events"):
