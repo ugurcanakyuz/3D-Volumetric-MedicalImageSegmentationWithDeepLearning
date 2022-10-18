@@ -16,21 +16,21 @@ class _BaseClass(ABC):
     @abstractmethod
     def get_train_indexes(self):
         """
-        Returns train data indexes.
+        Returns train Data indexes.
         """
         pass
 
     @abstractmethod
     def get_val_indexes(self):
         """
-        Returns validation data indexes.
+        Returns validation Data indexes.
         """
         pass
 
     @abstractmethod
     def get_test_indexes(self):
         """
-        Returns test data indexes.
+        Returns test Data indexes.
         """
         pass
 
@@ -311,7 +311,7 @@ class MRIDataset(Dataset):
         split: str
             "train", "val" or "test"
         path: str
-            Main folder path of the data.
+            Main folder path of the Data.
         cv: str
             Fold code of the cross-validation like CV1, CV2, CV3, CV4, and CV5 for 5-fold cross-validation.
             Warnings: Only implemented for FeTA dataset.
