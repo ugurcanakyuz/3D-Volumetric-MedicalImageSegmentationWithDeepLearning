@@ -97,11 +97,14 @@ tensorboard-plugin-wit==1.8.1
 terminado==0.12.1
 testpath==0.5.0
 tomli==1.2.3
-torch==1.10.2+cu113
-torchaudio==0.10.2+cu113
+--find-links https://download.pytorch.org/whl/cu116
+torch==1.12.1+cu116
+--find-links https://download.pytorch.org/whl/cu116
+torchvision==0.13.1+cu116
+--find-links https://download.pytorch.org/whl/cu116 
+torchaudio==0.12.1+cu116
 torchio==0.18.73
 torchsummary==1.5.1
-torchvision==0.11.3+cu113
 tornado==6.1
 tqdm==4.62.3
 traitlets==5.1.1
