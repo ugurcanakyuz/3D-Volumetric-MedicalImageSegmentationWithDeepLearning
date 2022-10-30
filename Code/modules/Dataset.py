@@ -357,7 +357,7 @@ class MRIDataset(Dataset):
             self.meta_data = self.meta_data.iloc[test_indexes]
 
         self.meta_data = self.meta_data.sort_values(by="participant_id")
-        self.meta_data = self.meta_data.reset_index().drop("index", axis=1)
+        self.meta_data = self.meta_data.reset_index(drop=True)
 
         self.dataset = tio.SubjectsDataset(self.__get_subjects(), transform=self.__transform)
 
