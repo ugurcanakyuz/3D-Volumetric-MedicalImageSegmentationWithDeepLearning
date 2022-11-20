@@ -6,8 +6,8 @@ This repository was created for machine learning research on FeTA2.1 dataset. Ai
 
 ### 1. Data
 
-  Dataset obtained from FeTA2021 Grand Challenge. Dataset consist of 80 subject of fetuses weeks from 21 to 33 weeks. Images and masks are in the nifti format. 
-  Dimensions of the images are 256x256x256. There are 8 class which includes background label.
+  Dataset obtained from FeTA2021 Grand Challenge. Dataset consist of 80 subject of fetuses from 21 to 33 weeks. Images and masks are in the NIfTI format. 
+  Dimensions of the raw MRIs are 256x256x256. There are 8 class which includes background label.
 ["The dataset facilitates the development of novel machine-learning and deep-learning based multi-class segmentation methods for the quantification of brain development on fetal MRI. The ultimate goal is to capture pathological developmental trajectories by the automated quantification of the prenatal development, for which automated approaches free of observer bias are indispensable."](http://neuroimaging.ch/feta) Some brief information about the labels can be found below. For more information, please follow the links in the notes.
 
 | dHCP label | Name | Notes |
