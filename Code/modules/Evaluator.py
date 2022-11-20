@@ -177,7 +177,7 @@ class Evaluator3D:
         running_losses = []
         dice_scores = []
 
-        sampler = tio.data.GridSampler(subject=None, patch_size=self.patch_size)
+
 
         prog_bar = tqdm.tqdm(enumerate(self.val_loader),
                              total=int(len(self.val_loader) / self.val_loader.batch_size))
@@ -191,7 +191,7 @@ class Evaluator3D:
                 mask = subject['mask']['data']
                 subject = tio.Subject(image=tio.ScalarImage(tensor=mri.squeeze(0)),
                                       mask=tio.LabelMap(tensor=mask.squeeze(0)))
-                sampler.subject = subject
+                sampler = tio.data.GridSampler(subject=subject, patch_size=self.patch_size)
                 aggregator = tio.data.GridAggregator(sampler, overlap_mode=overlap_mode_)
 
                 for j, patch in enumerate(sampler(subject)):
