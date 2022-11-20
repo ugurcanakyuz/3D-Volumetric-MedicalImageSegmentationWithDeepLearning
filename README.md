@@ -24,9 +24,9 @@ This repository was created for machine learning research on FeTA2.1 dataset. Ai
 <br><br>
 <p align="center">
   <img src="https://github.com/ugurcanakyuz/Thesis/blob/torchio_impl/Code/DataAnalysis/notebook_images/brain3.jpg?raw=true">
-  [Reference](https://www.researchgate.net/profile/Ching-Cheng-Chuang/publication/224283818/figure/fig1/AS:213943978074118@1428019627889/Three-dimensional-in-vivo-MRI-T1-brain-image-In-the-simulation-the-three-dimensional.png)
 </p>
-<p align="center">Brain tissues.</p>
+<p align="center">Brain tissues.   ![Reference](https://www.researchgate.net/profile/Ching-Cheng-Chuang/publication/224283818/figure/fig1/AS:213943978074118@1428019627889/Three-dimensional-in-vivo-MRI-T1-brain-image-In-the-simulation-the-three-dimensional.png)
+</p>
 
 
   
