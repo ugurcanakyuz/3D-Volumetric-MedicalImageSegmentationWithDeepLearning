@@ -1,0 +1,27 @@
+data:
+  train_path: 'Data/feta_processed2'
+  val_path: 'Data/feta_processed2'
+  batch_size: 1
+  patch_size: [128, 128, 128]
+optimizer:
+  SGD:
+    lr: 1.0E-01
+    momentum: 0.9
+    nesterov: True
+    lr: 1.0E-05
+#  Adam:
+#    betas: [0.9, 0.999]
+#    eps: 1.0E-08
+ES:
+  patience: 20
+  min_delta: 1.0E-03
+lr_scheduler:
+  CLR:
+    base: 1.0E-05
+    max: 1.0E-02
+    up: 3
+    down: 5
+    mode: 'triangular2'
+#  SLR:
+#    step_size: 13
+#    gamma: 1.0E-1
