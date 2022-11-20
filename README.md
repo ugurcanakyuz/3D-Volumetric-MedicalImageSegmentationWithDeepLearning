@@ -22,6 +22,7 @@ This repository was created for machine learning research on FeTA2.1 dataset. Ai
 
 <br><br>
 <p align="center">
+  ![Brain tissues.](https://github.com/ugurcanakyuz/Thesis/blob/torchio_impl/Code/DataAnalysis/notebook_images/brain3.jpg?raw=true)
   <img src="Code/DataAnaylsis/notebook_images/brain3.jpg">
 </p>
 <p align="center">Brain tissues.</p>
