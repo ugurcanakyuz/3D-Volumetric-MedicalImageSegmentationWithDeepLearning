@@ -44,13 +44,16 @@ class SDUNet3D(nn.Module):
         self.down_conv4 = self.__conv(256, 512)
 
         self.up_trans1 = nn.ConvTranspose3d(512, 512, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv1 = self.__conv(in_channels=768, out_channels=256)
+        self.up_conv1 = self.__conv(in_channels=1024, out_channels=512)
 
-        self.up_trans2 = nn.ConvTranspose3d(256, 256, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv2 = self.__conv(in_channels=384, out_channels=128)
+        self.up_trans2 = nn.ConvTranspose3d(512, 512, kernel_size=up_kernel_size, stride=up_stride)
+        self.up_conv2 = self.__conv(in_channels=768, out_channels=384)
 
-        self.up_trans3 = nn.ConvTranspose3d(128, 128, kernel_size=up_kernel_size, stride=up_stride)
-        self.up_conv3 = self.__conv(in_channels=192, out_channels=64)
+        self.up_trans3 = nn.ConvTranspose3d(384, 384, kernel_size=up_kernel_size, stride=up_stride)
+        self.up_conv3 = self.__conv(in_channels=512, out_channels=128)
+
+        self.up_trans4 = nn.ConvTranspose3d(128, 128, kernel_size=up_kernel_size, stride=up_stride)
+        self.up_conv4 = self.__conv(in_channels=192, out_channels=64)
 
         self.out = nn.Conv3d(in_channels=64, out_channels=n_classes, kernel_size=(1, 1, 1))
 
@@ -64,17 +67,21 @@ class SDUNet3D(nn.Module):
         x5 = self.down_conv3(x4)
         x6 = self.max_pool_2x2x2(x5)
         x7 = self.down_conv4(x6)
+        x8 = self.max_pool_2x2x2(x7)
 
         # decoder
-        x = self.up_trans1(x7)
-        x = torch.cat([x5, x], 1)
+        x = self.up_trans1(x8)
+        x = torch.cat([x7, x], 1)
         x = self.up_conv1(x)
         x = self.up_trans2(x)
-        x = torch.cat([x3, x], 1)
+        x = torch.cat([x5, x], 1)
         x = self.up_conv2(x)
         x = self.up_trans3(x)
-        x = torch.cat([x1, x], 1)
+        x = torch.cat([x3, x], 1)
         x = self.up_conv3(x)
+        x = self.up_trans4(x)
+        x = torch.cat([x1, x], 1)
+        x = self.up_conv4(x)
         x = self.out(x)
         # x = F.softmax(x, dim=1)
 
