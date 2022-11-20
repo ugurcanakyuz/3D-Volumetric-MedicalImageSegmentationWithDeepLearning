@@ -22,7 +22,7 @@ This repository was created for machine learning research on FeTA2.1 dataset. Ai
 
 <br><br>
 <p align="center">
-  <img src="https://www.researchgate.net/profile/Ching-Cheng-Chuang/publication/224283818/figure/fig1/AS:213943978074118@1428019627889/Three-dimensional-in-vivo-MRI-T1-brain-image-In-the-simulation-the-three-dimensional_Q320.jpg">
+  <img src="Code/DataAnaylsis/notebook_images/brain3.jpg">
 </p>
 <p align="center">Brain tissues.</p>
 
@@ -32,5 +32,6 @@ This repository was created for machine learning research on FeTA2.1 dataset. Ai
 Models have been implemented for the research. 
 - 2D UNet
 - 3D UNet
-
+- SDUNet3D
+- MeshNet
 ### 3. Results
