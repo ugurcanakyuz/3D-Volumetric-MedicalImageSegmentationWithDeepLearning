@@ -173,11 +173,9 @@ class Evaluator3D:
 
         avg_val_loss = None
         epoch_loss = []
-        overlap_mode_ = 'crop'
+        overlap_mode_ = 'average'
         running_losses = []
         dice_scores = []
-
-
 
         prog_bar = tqdm.tqdm(enumerate(self.val_loader),
                              total=int(len(self.val_loader) / self.val_loader.batch_size))
@@ -209,6 +207,7 @@ class Evaluator3D:
                 running_losses.append(val_loss.item())
 
                 # To calculate Dice Score get softmax applied predicted mask.
+                # Actually, no need for softmax, argmax will be enough for calculations.
                 pred_mask = F.softmax(output, dim=1)
 
                 # Create one hot encoded mask of original mask.
@@ -231,40 +230,3 @@ class Evaluator3D:
             avg_loss = sum(epoch_loss) / len(epoch_loss)
 
         return avg_loss, dice_scores
-
-    def predict(self, image):
-        """This methods gets an input image and gives it to model and return predicted mask. Masks are logits.
-
-        Parameters
-        ----------
-        image: torch.Tensor
-            3D image.
-
-        Returns
-        -------
-        output: torch.Tensor
-            Logits, not the actual class labels of Softmax function.
-        """
-
-        self.model.eval()
-
-        overlap_mode_ = 'crop'
-
-        sampler = tio.data.GridSampler(subject=None, patch_size=self.patch_size)
-
-        with torch.no_grad():
-            subject = tio.Subject(
-                image=tio.ScalarImage(tensor=image),
-            )
-
-            sampler.subject = subject
-            aggregator = tio.data.GridAggregator(sampler, overlap_mode=overlap_mode_)
-
-            for j, patch in enumerate(sampler(subject)):
-                patch_image = patch["image"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
-                output = self.model(patch_image)
-                aggregator.add_batch(output, patch["location"].unsqueeze(0))
-
-            output = aggregator.get_output_tensor().unsqueeze(0)
-
-        return output
