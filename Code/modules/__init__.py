@@ -1,5 +1,5 @@
 from .Config import Config
-from .Dataset import MRIDataset, MRIDatasets
+from .Dataset import *
 from .Evaluator import Evaluator2D, Evaluator3D
 from .Predictor import Predictor
 from .Tensorboard import TensorboardModules
