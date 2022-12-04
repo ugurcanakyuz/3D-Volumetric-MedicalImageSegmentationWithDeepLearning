@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 import os
-from enum import Enum
 
 import pandas as pd
+import torch
 from torch.utils.data import Dataset
 import torchio as tio
 
-from modules.Utils import get_file_names
+from .Utils import get_file_names
 
 
 class _BaseClass(ABC):
@@ -35,7 +35,7 @@ class _BaseClass(ABC):
         pass
 
 
-class _FeTA(_BaseClass):
+class FeTA(_BaseClass):
     def __init__(self, meta_data, cv):
         """5-Fold Cross Validation applied.
         | - 16 - | - 16 - | - 16 - | - 16 - | - 16 -|
@@ -81,7 +81,7 @@ class _FeTA(_BaseClass):
         assert False, "This dataset implemented for cross-validation. There are only training and validation sets."
 
 
-class _FeTABalancedDistribution(_BaseClass):
+class FeTABalancedDistribution(_BaseClass):
     """
     There are 80 MRI images of 80 subjects in the FeTA2021. Gestational ages of subjects ranges 20 weeks to 35 weeks.
     There are Pathological and Neurotypical subjects.
@@ -165,7 +165,7 @@ class _FeTABalancedDistribution(_BaseClass):
         return sorted(test)
 
 
-class _Dhcp(_BaseClass):
+class Dhcp(_BaseClass):
     """
     dHCP dataset contains 738 neonatal subjects. Scan age of MRIs belongs to these subjects range from 26 to 45 weeks.
     Only 89 of them whose MRIs were recorded under 35 weeks were selected for this experiment. first 70% of them (~69)
@@ -185,14 +185,14 @@ class _Dhcp(_BaseClass):
         return sorted(self.meta_data[76:].index.to_list())
 
 
-class _DhcpFeta(_BaseClass):
+class DhcpFeta(_BaseClass):
     """This class loads the combination of dHCP and FeTA datasets from the participants file which includes subjects
     of both dataset.
     """
 
     def __init__(self, meta_data):
-        self.feta = _FeTABalancedDistribution(meta_data[:80])
-        self.dhcp = _Dhcp(meta_data[80:])
+        self.feta = FeTABalancedDistribution(meta_data[:80])
+        self.dhcp = Dhcp(meta_data[80:])
 
     def get_train_indexes(self):
         return sorted([*self.feta.get_train_indexes(), *self.dhcp.get_train_indexes()])
@@ -204,7 +204,7 @@ class _DhcpFeta(_BaseClass):
         return sorted([*self.feta.get_test_indexes(), *self.dhcp.get_test_indexes()])
 
 
-class _EarlyWeeks(_BaseClass):
+class EarlyWeeks(_BaseClass):
     """This class provides the indexes of subjects gestational age < 24.9 weeks.
     """
 
@@ -231,7 +231,7 @@ class _EarlyWeeks(_BaseClass):
         return sorted(test)
 
 
-class _MiddleWeeks(_BaseClass):
+class MiddleWeeks(_BaseClass):
     """This class provides the indexes of subjects 24.9 <= gestational age < 29.8 weeks .
     """
 
@@ -258,7 +258,7 @@ class _MiddleWeeks(_BaseClass):
         return sorted(test)
 
 
-class _LateWeeks(_BaseClass):
+class LateWeeks(_BaseClass):
     """This class provides the indexes of subjects 29.8 weeks <= gestational age .
     """
 
@@ -285,29 +285,36 @@ class _LateWeeks(_BaseClass):
         return sorted(test)
 
 
-class MRIDatasets(Enum):
-    FeTA = "FeTA"
-    dHCP = "dHCP"
-    dHCP_FeTA = "dF"
+class RandomSplit(_BaseClass):
+    def __init__(self, meta_data):
+        train, val, test =  torch.utils.data.random_split(meta_data, lengths=[60, 10, 10],
+                                                 generator=torch.Generator().manual_seed(0))
 
-    FeTA_BalancedDistribution = "FBD"
-    FeTA_EarlyWeeks = "FEW"
-    FeTA_MiddleWeeks = "FMW"
-    FeTA_LateWeeks = "FLW"
+        self.train_indexes = train.indices
+        self.val_indexes = val.indices
+        self.test_indexes = test.indices
+
+    def get_train_indexes(self):
+        return self.train_indexes
+
+    def get_val_indexes(self):
+        return self.val_indexes
+
+    def get_test_indexes(self):
+        return self.test_indexes
 
 
 class MRIDataset(Dataset):
     """Load MRI datasets.
     """
 
-    def __init__(self, dataset=None, split="train", path="feta_2.1",
-                 cv="cv1", patch_size=(128, 128, 128), transform=None):
+    def __init__(self, dataset=None, split=None, path="feta_2.1", cv=None, transform=None):
         """Creates train, validation or test sets from FeTA2.1 and/or dHCP dataset.
 
         Parameters
         ----------
-        dataset: Element of MRIDatasets
-            Dataset class, FeTA, dHCP or others.
+        dataset: Classes of Dataset
+            FeTA, Dhcp or others.
         split: str
             "train", "val" or "test"
         path: str
@@ -318,33 +325,25 @@ class MRIDataset(Dataset):
         transform: torch or torchio transforms
         """
 
-        assert dataset is not None, "Pass the dataset code as a MRIDataset value."
+        assert dataset is not None, "Choose a dataset"
 
-        dataset_x = None
         self.__path_base = path
         self.__transform = transform
         self.meta_data = pd.read_csv(os.path.join(self.__path_base, "participants.tsv"), sep="\t")
         self.__paths_file = get_file_names(self.__path_base)
 
-        if dataset is (MRIDatasets.FeTA_EarlyWeeks or MRIDatasets.FeTA_MiddleWeeks or MRIDatasets.FeTA_LateWeeks):
-            self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-007"].index, inplace=True)
-            self.meta_data.drop(self.meta_data[self.meta_data["participant_id"] == "sub-009"].index, inplace=True)
+        # dropped sub-ids
+        low_quality_mris = ["sub-007", "sub-009"]
+        if dataset is (FeTABalancedDistribution or EarlyWeeks or MiddleWeeks or LateWeeks):
+            drop_indexes = self.meta_data[self.meta_data["participant_id"].isin(low_quality_mris)].index
+            self.meta_data.drop(drop_indexes, inplace=True)
             self.meta_data = self.meta_data.sort_values(by="participant_id").reset_index(drop=True)
 
-        if dataset is MRIDatasets.FeTA:
-            dataset_x = _FeTA(self.meta_data, cv)
-        elif dataset is MRIDatasets.dHCP:
-            dataset_x = _Dhcp(self.meta_data)
-        elif dataset is MRIDatasets.dHCP_FeTA:
-            dataset_x = _DhcpFeta(self.meta_data)
-        elif dataset is MRIDatasets.FeTA_BalancedDistribution:
-            dataset_x = _FeTABalancedDistribution(self.meta_data)
-        elif dataset is MRIDatasets.FeTA_EarlyWeeks:
-            dataset_x = _EarlyWeeks(self.meta_data)
-        elif dataset is MRIDatasets.FeTA_MiddleWeeks:
-            dataset_x = _MiddleWeeks(self.meta_data)
-        elif dataset is MRIDatasets.FeTA_LateWeeks:
-            dataset_x = _LateWeeks(self.meta_data)
+        # Cross Validation Dataset
+        if cv:
+            dataset_x = dataset(self.meta_data, cv)
+        else:
+            dataset_x = dataset(self.meta_data)
 
         if split == "train":
             train_indexes = dataset_x.get_train_indexes()
@@ -352,7 +351,7 @@ class MRIDataset(Dataset):
         elif split == "val":
             val_indexes = dataset_x.get_val_indexes()
             self.meta_data = self.meta_data.iloc[val_indexes]
-        else:
+        elif split == "test":
             test_indexes = dataset_x.get_test_indexes()
             self.meta_data = self.meta_data.iloc[test_indexes]
 
