@@ -71,6 +71,9 @@ class FeTA(_BaseClass):
         self.train = pd.concat([self.meta_data[:self.pt1], self.meta_data[self.pt2:]])
         self.val = self.meta_data[self.pt1:self.pt2]
 
+    def __str__(self):
+        return "Dataset_FeTA_5-fold_CV"
+
     def get_train_indexes(self):
         return self.train.index.to_list()
 
@@ -108,6 +111,9 @@ class FeTABalancedDistribution(_BaseClass):
 
     Note: 28 was determined intuitively for diversity gestational weeks and smoother age distribution.
     """
+
+    def __str__(self):
+        return "Dataset_FeTABalancedDistribution"
 
     def __init__(self, meta_data):
         mial_srtk = meta_data[:40]
@@ -175,6 +181,9 @@ class Dhcp(_BaseClass):
     def __init__(self, meta_data):
         self.meta_data = meta_data
 
+    def __str__(self):
+        return "Dataset_dHCP"
+
     def get_train_indexes(self):
         return sorted(self.meta_data[:63].index.to_list())
 
@@ -193,6 +202,9 @@ class DhcpFeta(_BaseClass):
     def __init__(self, meta_data):
         self.feta = FeTABalancedDistribution(meta_data[:80])
         self.dhcp = Dhcp(meta_data[80:])
+
+    def __str__(self):
+        return "Dataset_dHCP+FeTA"
 
     def get_train_indexes(self):
         return sorted([*self.feta.get_train_indexes(), *self.dhcp.get_train_indexes()])
@@ -214,6 +226,9 @@ class EarlyWeeks(_BaseClass):
 
         self.mial_srtk = meta_data[:10]
         self.simple_irtk = meta_data[10:]
+
+    def __str__(self):
+        return "Dataset_FeTA<24.9"
 
     def get_train_indexes(self):
         train = [*self.mial_srtk[:8].index.to_list(), *self.simple_irtk[:10].index.to_list()]
@@ -242,6 +257,9 @@ class MiddleWeeks(_BaseClass):
         self.mial_srtk = meta_data[:20]
         self.simple_irtk = meta_data[20:]
 
+    def __str__(self):
+        return "Dataset_24.9<FeTA<29.8"
+
     def get_train_indexes(self):
         train = [*self.mial_srtk[:14].index.to_list(), *self.simple_irtk[:11].index.to_list()]
 
@@ -269,6 +287,9 @@ class LateWeeks(_BaseClass):
         self.mial_srtk = meta_data[:8]
         self.simple_irtk = meta_data[8:]
 
+    def __str__(self):
+        return "Dataset_29.8<FeTA"
+
     def get_train_indexes(self):
         train = [*self.mial_srtk[:5].index.to_list(), *self.simple_irtk[:6].index.to_list()]
 
@@ -293,6 +314,9 @@ class RandomSplit(_BaseClass):
         self.train_indexes = train.indices
         self.val_indexes = val.indices
         self.test_indexes = test.indices
+
+    def __str__(self):
+        return "Dataset_RandomSplit"
 
     def get_train_indexes(self):
         return self.train_indexes
