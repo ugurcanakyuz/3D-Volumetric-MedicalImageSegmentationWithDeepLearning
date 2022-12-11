@@ -358,7 +358,7 @@ class MRIDataset(Dataset):
 
         # dropped sub-ids
         low_quality_mris = ["sub-007", "sub-009"]
-        if dataset is (FeTABalancedDistribution or EarlyWeeks or MiddleWeeks or LateWeeks):
+        if dataset is (EarlyWeeks or MiddleWeeks or LateWeeks):
             drop_indexes = self.meta_data[self.meta_data["participant_id"].isin(low_quality_mris)].index
             self.meta_data.drop(drop_indexes, inplace=True)
             self.meta_data = self.meta_data.sort_values(by="participant_id").reset_index(drop=True)
