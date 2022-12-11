@@ -5,42 +5,6 @@ import torch
 import torchio as tio
 
 
-class Preprocessing:
-    def __init__(self, path_landmark):
-        self.preprocessing = tio.HistogramStandardization(landmarks=path_landmark,
-                                                          masking_method=tio.ZNormalization.mean)
-
-    @staticmethod
-    def apply_normalization(mri):
-        preprocessing = tio.ZNormalization(masking_method=tio.ZNormalization.mean)
-        mri = mri.view(1, *mri.shape)
-        mri = preprocessing(mri)
-        mri = mri.view(mri.shape[1:])
-
-        return mri
-
-    def apply_histogram_equalization(self, mri):
-        """See: https://torchio.readthedocs.io/transforms/preprocessing.html#histogramstandardization
-
-        Parameters
-        ----------
-        mri: torch.Tensor
-            (x, y, z)
-
-        Returns
-        -------
-        mri: torch.Tensor
-            (x, y, z)
-        """
-
-        subject = tio.Subject(t2=tio.ScalarImage(tensor=mri.unsqueeze(0)))
-        subject = self.preprocessing(subject)
-        mri = subject['t2'].data
-        mri = mri.squeeze(0)
-
-        return mri
-
-
 class Mask:
     """Sets voxel outside of brain region the background value. Similar to torchio.Mask.
        See details: https://torchio.readthedocs.io/transforms/preprocessing.html#mask
