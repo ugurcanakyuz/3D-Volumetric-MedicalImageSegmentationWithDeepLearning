@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 import torch
 import torch.nn.functional as F
 import torchio as tio
@@ -145,6 +149,7 @@ class Evaluator3D:
         None
         """
 
+        self.cm = None
         self.model = model
         self.patch_size = patch_size
         self.val_loader = val_loader
@@ -199,7 +204,6 @@ class Evaluator3D:
                     aggregator.add_batch(output, patch["location"].unsqueeze(0))
 
                 output = aggregator.get_output_tensor().unsqueeze(0)
-                mask = mask
 
                 # Validation loss calculated on the aggregated so whole predicted mask.
                 # Criterion accepts raw logits so softmax has not been applied to predicted mask yet.
@@ -230,3 +234,55 @@ class Evaluator3D:
             avg_loss = sum(epoch_loss) / len(epoch_loss)
 
         return avg_loss, dice_scores
+
+    def calculate_cm(self):
+        overlap_mode_ = 'average'
+
+        prog_bar = tqdm.tqdm(enumerate(self.val_loader),
+                             total=int(len(self.val_loader) / self.val_loader.batch_size))
+        prog_bar.set_description(f"Validation ")
+
+        cms = []
+
+        self.model.eval()
+        with torch.no_grad():
+            for i, subject in prog_bar:
+                mri = subject['mri']['data']
+                mask = subject['mask']['data']
+                subject = tio.Subject(image=tio.ScalarImage(tensor=mri.squeeze(0)),
+                                      mask=tio.LabelMap(tensor=mask.squeeze(0)))
+                sampler = tio.data.GridSampler(subject=subject, patch_size=self.patch_size)
+                aggregator = tio.data.GridAggregator(sampler, overlap_mode=overlap_mode_)
+
+                for j, patch in enumerate(sampler(subject)):
+                    patch_mri = patch["image"].data.unsqueeze(1).to(self.device)  # [bs,1,x,y,z]
+
+                    output = self.model(patch_mri.float())
+                    aggregator.add_batch(output, patch["location"].unsqueeze(0))
+
+                output = aggregator.get_output_tensor().unsqueeze(0)
+                # Convert class probabilities to actual class labels.
+                pred_mask = torch.argmax(output, dim=1, keepdim=True)
+
+                cm = confusion_matrix(mask.ravel(), pred_mask.ravel())
+                cms.append(cm)
+
+        self.cm = sum(cms)
+
+        return self.cm
+
+    def plot_confusion_matrix(self):
+        labels = ['Background', 'eCSF', 'Gray Matter', 'White Matter',
+                  'Ventricles', 'Cerrebilium', 'Deep Gray Matter',
+                  'Brain Stem']
+        # Normalize
+        cm = self.cm.astype('float') / self.cm.sum(axis=1)[:, np.newaxis]
+
+        plt.figure(figsize=(10, 6))
+        fx = sns.heatmap(cm, annot=True, fmt='.2f', cmap='GnBu')
+        fx.set_title('Confusion Matrix \n')
+        fx.set_xlabel('\n Predicted Values\n')
+        fx.set_ylabel('Actual Values\n')
+        fx.xaxis.set_ticklabels(labels, rotation=45, ha="right")
+        fx.yaxis.set_ticklabels(labels, rotation=45, ha="right")
+        plt.show()
