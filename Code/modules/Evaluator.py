@@ -236,8 +236,18 @@ class Evaluator3D:
         return avg_loss, dice_scores
 
     def calculate_cm(self):
-        overlap_mode_ = 'average'
+        """Calculate confusion matrix for each class.
 
+        Parameters
+        ----------
+        None.
+
+        Returns
+        -------
+        None.
+        """
+
+        overlap_mode_ = 'average'
         prog_bar = tqdm.tqdm(enumerate(self.val_loader),
                              total=int(len(self.val_loader) / self.val_loader.batch_size))
         prog_bar.set_description(f"Validation ")
@@ -272,10 +282,23 @@ class Evaluator3D:
         return self.cm
 
     def plot_confusion_matrix(self):
+        """Plot confusion matrix for each class.
+
+        Parameters
+        ----------
+        None.
+
+        Returns
+        -------
+        None.
+        """
+
         labels = ['Background', 'eCSF', 'Gray Matter', 'White Matter',
                   'Ventricles', 'Cerrebilium', 'Deep Gray Matter',
                   'Brain Stem']
-        # Normalize
+
+        assert self.cm, "Calculate confusion matrix first. Call <EvaluatorObject>.calculate_cm"
+        # Normalize confusion matrix
         cm = self.cm.astype('float') / self.cm.sum(axis=1)[:, np.newaxis]
 
         plt.figure(figsize=(10, 6))
