@@ -297,7 +297,7 @@ class Evaluator3D:
                   'Ventricles', 'Cerrebilium', 'Deep Gray Matter',
                   'Brain Stem']
 
-        assert self.cm, "Calculate confusion matrix first. Call <EvaluatorObject>.calculate_cm"
+        assert self.cm is not None, "Calculate confusion matrix first. Call <EvaluatorObject>.calculate_cm"
         # Normalize confusion matrix
         cm = self.cm.astype('float') / self.cm.sum(axis=1)[:, np.newaxis]
 
