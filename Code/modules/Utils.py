@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 import torch
-
+from tensorflow.python.summary.summary_iterator import summary_iterator
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable Tensorflow logs, it is used only for reading Tensorboard scalars.
 
 def calculate_dice_score(pred, mask, smooth=1e-5):
     """This method calculates the dice score for each given class.
@@ -204,7 +205,7 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
     plt.show()
 
 
-def save_nii(folder, file_name, data):
+def save_nii(folder, file_name, data, affine):
     """Saves MRI or mask Data as nii.gz file. First converts ndarray to Nifti1Image, then save it as nii.gz. file.
 
     Parameters
@@ -215,6 +216,7 @@ def save_nii(folder, file_name, data):
         File name without '.nii.gz' extension.
     data: ndarray
         3 dimension (x, y, z,) MRI or mask Data.
+    affine: ndarray
 
     Returns
     -------
@@ -226,7 +228,7 @@ def save_nii(folder, file_name, data):
 
     # First convert ndarray nibabel format.
     try:
-        data = nib.Nifti1Image(data, np.eye(4))
+        data = nib.Nifti1Image(data, affine=affine)   #ToDo: Didn't tested.
     except Exception as e:
         print(f"Conversion error: {e}")
 
@@ -236,6 +238,63 @@ def save_nii(folder, file_name, data):
     except Exception as e:
         print(f"Saving error: {e}")
 
+def __create_stats_dict():
+    tb_tags = ['0-Background and Non-Brain',
+               '1-Extra-axial CSF',
+               '2-Gray Matter and developing cortical plate',
+               '3-White matter and subplate',
+               '4-Lateral ventricles',
+               '5-Cerebellum',
+               '6-Thalamus and putamen',
+               '7-Brainstem',
+               'Learning rate',
+               'Training loss',
+               'Validation loss']
+
+    stats = {}
+
+    for tag in tb_tags:
+        stats[tag] = []
+
+    return stats
+
+def read_scalars(event_file_path, epoch=None):
+    """Read scalars/statistics from Tensorboard.
+    epoch >= 0 returns the scalars at the given epoch.
+    epoch -1 returns the values at the index of the lowest validation loss.
+
+    Parameters
+    ----------
+    event_file_path: str
+    epoch: int [optional]
+    Returns
+    -------
+    """
+
+    stats = __create_stats_dict()
+
+    for e in summary_iterator(event_file_path):
+        for v in e.summary.value:
+            if (v.tag != 'Fetal Brain Images') and (v.tag != 'Fetal Brain Masks'):
+                stats[v.tag.split(': ')[-1]].append(round(v.simple_value, 4))
+    if epoch is None:
+        return stats
+    elif epoch >= 0:
+        assert epoch < len(stats['Training loss']), 'Step is out of training epoch.'
+        print("Epoch: ", epoch)
+        epoch_stats = {}
+        for stat_name, values in stats.items():
+            epoch_stats[stat_name] = values[epoch]
+        return epoch_stats
+    elif epoch == -1:
+        best_stats = {}
+        lowest_step_idx = np.argmin(stats['Validation loss'])
+        print("Epoch: ", lowest_step_idx+1)
+        for stat_name, values in stats.items():
+            best_stats[stat_name] = values[lowest_step_idx]
+        return best_stats
+    else:
+        pass
 
 class EarlyStopping:
     # Implemented from https://debuggercafe.com/using-learning-rate-scheduler-and-early-stopping-with-pytorch/
