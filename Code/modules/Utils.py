@@ -5,6 +5,7 @@ import re
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
+import pandas as pd
 import torch
 from tensorflow.python.summary.summary_iterator import summary_iterator
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable Tensorflow logs, it is used only for reading Tensorboard scalars.
@@ -295,6 +296,33 @@ def read_scalars(event_file_path, epoch=None):
         return best_stats
     else:
         pass
+
+def print_evaluation_results(val_scores, dataset):
+    tissue_classes = ["Background", "eCSF", "Gray Matter", "White Matter", "Ventricles",
+                      "Cerrebilium", "Deep Gray Matter", "Brain Stem"]
+    colors = ["#000000", "#808000", "#D3D3D3", "#FFFFFF", "#000080", "#FF4500", "#696969", "#B22222"]
+
+    # Evaluate the last model on validation set.
+
+    avg_val_scores = sum(val_scores) / len(val_scores)
+    # Convert Tensors to list.
+    val_scores = [score.tolist() for score in val_scores]
+    # Combine results and subject information to examine data carefully.
+    val_results = pd.DataFrame(val_scores, index=dataset.meta_data["participant_id"], columns=tissue_classes)
+    val_results = pd.merge(dataset.meta_data, val_results, on=["participant_id"])
+
+    # Display results.
+    print(f"Average Validation Dice Scores{avg_val_scores}")
+
+    bp = plt.boxplot(val_results.iloc[:, 3:], labels=tissue_classes[:], patch_artist=True)
+    for patch, color in zip(bp['boxes'], colors):
+        patch.set_facecolor(color)
+    plt.xticks(rotation=45)
+    plt.grid()
+    plt.show()
+
+    val_results
+
 
 class EarlyStopping:
     # Implemented from https://debuggercafe.com/using-learning-rate-scheduler-and-early-stopping-with-pytorch/
