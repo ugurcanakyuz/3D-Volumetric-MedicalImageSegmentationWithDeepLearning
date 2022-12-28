@@ -11,8 +11,7 @@ class UNet3D(nn.Module):
         up_stride = (2, 2, 2)
 
         self.max_pool_2x2x2 = nn.MaxPool3d(kernel_size=(2, 2, 2), stride=(2, 2, 2))
-        self.down_conv_input = nn.Conv3d(1, 8, kernel_size=(3, 3, 3), padding="same", padding_mode="zeros")
-        self.down_conv1 = self.__double_down_conv(8, 64)
+        self.down_conv1 = self.__double_down_conv(1, 64)
         self.down_conv2 = self.__double_down_conv(64, 128)
         self.down_conv3 = self.__double_down_conv(128, 256)
         self.down_conv4 = self.__double_down_conv(256, 512)
@@ -31,8 +30,7 @@ class UNet3D(nn.Module):
     def forward(self, image):
         # bs, c, d, h, w
         # encoder
-        xi = self.down_conv_input(image)
-        x1 = self.down_conv1(xi)
+        x1 = self.down_conv1(image)
         x2 = self.max_pool_2x2x2(x1)
         x3 = self.down_conv2(x2)
         x4 = self.max_pool_2x2x2(x3)
