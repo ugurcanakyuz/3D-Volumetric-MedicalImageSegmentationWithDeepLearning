@@ -297,9 +297,15 @@ def read_scalars(event_file_path, epoch=None):
     else:
         pass
 
-def print_evaluation_results(val_scores, dataset):
-    tissue_classes = ["Background", "eCSF", "Gray Matter", "White Matter", "Ventricles",
-                      "Cerrebilium", "Deep Gray Matter", "Brain Stem"]
+def print_evaluation_results(val_scores, dataset, lang=None):
+    if lang == 'tr':
+        tissue_classes = ['Arka Plan', 'eCSF', 'Gri Cevher', 'Beyaz Cevher',
+                  'Ventriküller', 'Beyincik', 'TP',
+                  'Beyin Sapı']
+    else:
+        tissue_classes = ['Background', 'eCSF', 'Gray Matter', 'White Matter',
+                  'Ventricles', 'Cerrebilium', 'Deep Gray Matter',
+                  'Brain Stem']
     colors = ["#000000", "#808000", "#D3D3D3", "#FFFFFF", "#000080", "#FF4500", "#696969", "#B22222"]
 
     # Evaluate the last model on validation set.
@@ -312,7 +318,7 @@ def print_evaluation_results(val_scores, dataset):
     val_results = pd.merge(dataset.meta_data, val_results, on=["participant_id"])
 
     # Display results.
-    print(f"Average Validation Dice Scores{avg_val_scores}")
+    # print(f"Average Validation Dice Scores{avg_val_scores}")
 
     bp = plt.boxplot(val_results.iloc[:, 3:], labels=tissue_classes[:], patch_artist=True)
     for patch, color in zip(bp['boxes'], colors):
@@ -321,7 +327,7 @@ def print_evaluation_results(val_scores, dataset):
     plt.grid()
     plt.show()
 
-    val_results
+    return avg_val_scores
 
 
 class EarlyStopping:
