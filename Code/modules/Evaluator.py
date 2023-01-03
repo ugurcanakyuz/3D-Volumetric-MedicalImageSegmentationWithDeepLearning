@@ -281,7 +281,7 @@ class Evaluator3D:
 
         return self.cm
 
-    def plot_confusion_matrix(self):
+    def plot_confusion_matrix(self, lang=None):
         """Plot confusion matrix for each class.
 
         Parameters
@@ -293,9 +293,14 @@ class Evaluator3D:
         None.
         """
 
-        labels = ['Background', 'eCSF', 'Gray Matter', 'White Matter',
-                  'Ventricles', 'Cerrebilium', 'Deep Gray Matter',
-                  'Brain Stem']
+        if lang=='tr':
+            labels = ['Arka Plan', 'eCSF', 'Gri Cevher', 'Beyaz Cevher',
+                      'Ventriküller', 'Beyincik', 'TP',
+                      'Beyin Sapı']
+        else:
+            labels = ['Background', 'eCSF', 'Gray Matter', 'White Matter',
+                      'Ventricles', 'Cerrebilium', 'Deep Gray Matter',
+                      'Brain Stem']
 
         assert self.cm is not None, "Calculate confusion matrix first. Call <EvaluatorObject>.calculate_cm"
         # Normalize confusion matrix
@@ -303,9 +308,14 @@ class Evaluator3D:
 
         plt.figure(figsize=(10, 6))
         fx = sns.heatmap(cm, annot=True, fmt='.2f', cmap='GnBu')
-        fx.set_title('Confusion Matrix \n')
-        fx.set_xlabel('\n Predicted Values\n')
-        fx.set_ylabel('Actual Values\n')
+        if lang=='tr':
+            fx.set_title('Hata Matrisi \n')
+            fx.set_xlabel('\n Tahmini Değerler\n')
+            fx.set_ylabel('Gerçek Değerler\n')
+        else:
+            fx.set_title('Confusion Matrix \n')
+            fx.set_xlabel('\n Predicted Values\n')
+            fx.set_ylabel('Actual Values\n')
         fx.xaxis.set_ticklabels(labels, rotation=45, ha="right")
         fx.yaxis.set_ticklabels(labels, rotation=45, ha="right")
         plt.show()
