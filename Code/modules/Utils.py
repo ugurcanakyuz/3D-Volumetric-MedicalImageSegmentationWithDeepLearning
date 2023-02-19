@@ -2,6 +2,7 @@ import glob
 import os
 import re
 
+import cv2
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
@@ -9,6 +10,15 @@ import pandas as pd
 import torch
 from tensorflow.python.summary.summary_iterator import summary_iterator
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable Tensorflow logs, it is used only for reading Tensorboard scalars.
+
+#Locale settings
+#import locale
+# Set to German locale to get comma decimal separater
+#locale.setlocale(locale.LC_NUMERIC, "tr_TR")
+#plt.rcdefaults()
+
+# Tell matplotlib to use the locale we set above
+#plt.rcParams['axes.formatter.use_locale'] = True
 
 def calculate_dice_score(pred, mask, smooth=1e-5):
     """This method calculates the dice score for each given class.
@@ -173,6 +183,63 @@ def init_weights_kaiming(m):
         m.bias.data.fill_(0)
 
 
+class COLORS:
+    def __init__(self):
+        """RGB color codes for RGB masks.
+        """
+
+        self.colors = {0: (0, 0, 0),  # Black for background.
+                       1: (128, 128, 0),  # Olive for CSF.
+                       2: (211, 211, 211),  # Light gray for gray matter.
+                       3: (255, 255, 255),  # White for white matter.
+                       4: (0, 0, 128),  # Navy for ventricles.
+                       5: (255, 69, 0),  # Orange red for cerebellum.
+                       6: (105, 105, 105),  # Dim gray for deep gray matter.
+                       7: (178, 34, 34)  # Firebrick for brainstem and spinal cord.
+                       }
+
+
+def change_colors(mask, colors):
+    """Changes the color of label in the mask.
+
+    Parameters
+    ----------
+    mask: 2D numpy array
+    colors: dict
+        label number: RGB code
+
+    Returns
+    -------
+    2D numpy array
+    """
+
+    mask = mask.astype(int)
+    labels = set(mask[:, :, 2].flatten())
+
+    for label in labels:
+        mask[mask[:, :, 2] == label] = colors[label]
+
+    return mask
+
+
+
+def convert_to_3D(mask):
+    """Adds one more dimeson to 2D mask image in order to obtain RGB mask.
+
+    Parameters
+    ----------
+    mask: 2D numpy array
+
+    Returns
+    -------
+    mask_rgb: 2D numpy array
+    """
+
+    zeros = np.zeros((*mask.shape[:2], 2))
+    mask_rgb = np.stack((zeros[:, :, 0], zeros[:, :, 1], mask), axis=2).astype(int)
+
+    return mask_rgb
+
 def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
     """ Plots image, mask and prediction.
 
@@ -188,16 +255,27 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
     None
     """
 
+    mask_3d = convert_to_3D(mask)
+    colors = COLORS()
+    mask_rgb = change_colors(mask_3d, colors.colors)
+
+
     fig = plt.figure(figsize=fig_size)
     fig.add_subplot(1, 3, 1)
-    plt.imshow(image)
+    plt.xlabel("a) MR Kesit")
+    plt.imshow(np.rot90(image), cmap='gray')
     fig.add_subplot(1, 3, 2)
-    plt.imshow(mask)
+    plt.imshow(np.rot90(mask_rgb), cmap='jet')
+    plt.xlabel("b) Gerçek Maske Kesit")
 
     try:
         if torch.any(pred_mask):
+            pred_mask_3d = convert_to_3D(pred_mask)
+            pred_mask_rgb = change_colors(pred_mask_3d, colors.colors)
+
             fig.add_subplot(1, 3, 3)
-            plt.imshow(pred_mask)
+            plt.imshow(np.rot90(pred_mask_rgb))
+            plt.xlabel("c) Tahmini Maske Kesit")
     except TypeError:
         if np.any(pred_mask):
             fig.add_subplot(1, 3, 3)
@@ -205,6 +283,79 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
 
     plt.show()
 
+
+
+def plot_sub_orient(mri, mask, pred, slice_idx=60):
+    colors = COLORS()
+
+    mri_sagittal = mri[0, slice_idx, :, :].numpy()
+
+    mask_sagittal = mask[0, slice_idx, :, :]
+    mask_sagittal = convert_to_3D(mask_sagittal)
+    mask_sagittal = change_colors(mask_sagittal, colors.colors)
+
+    pred_sagittal = pred[0, slice_idx, :, :]
+    pred_sagittal = convert_to_3D(pred_sagittal)
+    pred_sagittal = change_colors(pred_sagittal, colors.colors)
+
+    mri_coronal = mri[0, :, slice_idx, :].numpy()
+
+    mask_coronal = mask[0, :, slice_idx, :]
+    mask_coronal = convert_to_3D(mask_coronal)
+    mask_coronal = change_colors(mask_coronal, colors.colors)
+
+    pred_coronal = pred[0, :, slice_idx, :]
+    pred_coronal = convert_to_3D(pred_coronal)
+    pred_coronal = change_colors(pred_coronal, colors.colors)
+
+
+    mri_axial = mri[0, :, :, slice_idx].numpy()
+
+    mask_axial = mask[0, :, :, slice_idx]
+    mask_axial = convert_to_3D(mask_axial)
+    mask_axial = change_colors(mask_axial, colors.colors)
+
+    pred_axial = pred[0, :, :, slice_idx]
+    pred_axial = convert_to_3D(pred_axial)
+    pred_axial = change_colors(pred_axial, colors.colors)
+
+    plots = [[mri_axial, mask_axial, pred_axial], [mri_sagittal, mask_sagittal, pred_sagittal],
+             [mri_coronal, mask_coronal, pred_coronal]]
+
+    fig, axes = plt.subplots(3, 3, figsize=(12, 12))
+
+    for i, ax in enumerate(axes):
+        ax[0].imshow(np.rot90(cv2.resize(plots[i][0], (256, 256), interpolation = cv2.INTER_AREA)), cmap='gray')
+        ax[0].set_facecolor('black')
+        ax[0].yaxis.set_major_locator(plt.NullLocator())
+        ax[0].xaxis.set_major_locator(plt.NullLocator())
+
+        ax[1].imshow(np.rot90(cv2.resize(plots[i][1].astype(np.uint8), (256, 256), interpolation = cv2.INTER_AREA)))
+        ax[1].set_facecolor('black')
+        ax[1].yaxis.set_major_locator(plt.NullLocator())
+        ax[1].xaxis.set_major_locator(plt.NullLocator())
+
+        ax[2].imshow(np.rot90(cv2.resize(plots[i][2].astype(np.uint8), (256, 256), interpolation = cv2.INTER_AREA)))
+        ax[2].set_facecolor('black')
+        ax[2].yaxis.set_major_locator(plt.NullLocator())
+        ax[2].xaxis.set_major_locator(plt.NullLocator())
+
+        if i==0:
+            ax[0].set_ylabel('aksiyal')
+
+
+        if i==1:
+            ax[0].set_ylabel('sagital')
+
+
+        if i==2:
+            ax[0].set_ylabel('koronal')
+            ax[0].set_xlabel('MR Kesit')
+            ax[1].set_xlabel('Gerçek Maske Kesit')
+            ax[2].set_xlabel('Tahmini Maske Kesit')
+
+    plt.subplots_adjust(wspace=0, hspace=0.01)
+    plt.show()
 
 def save_nii(folder, file_name, data, affine):
     """Saves MRI or mask Data as nii.gz file. First converts ndarray to Nifti1Image, then save it as nii.gz. file.
@@ -300,7 +451,7 @@ def read_scalars(event_file_path, epoch=None):
 def print_evaluation_results(val_scores, dataset, lang=None):
     if lang == 'tr':
         tissue_classes = ['Arka Plan', 'eCSF', 'Gri Cevher', 'Beyaz Cevher',
-                  'Ventriküller', 'Beyincik', 'TP',
+                  'Ventriküller', 'Beyincik', 'TaPu',
                   'Beyin Sapı']
     else:
         tissue_classes = ['Background', 'eCSF', 'Gray Matter', 'White Matter',
