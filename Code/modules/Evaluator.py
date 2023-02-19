@@ -10,6 +10,15 @@ import tqdm
 from torch.utils.data import DataLoader
 from modules.Utils import calculate_dice_score, create_onehot_mask
 
+#Locale settings
+#import locale
+# Set to German locale to get comma decimal separater
+#locale.setlocale(locale.LC_ALL, "tr_TR")
+#plt.rcdefaults()
+
+# Tell matplotlib to use the locale we set above
+#plt.rcParams['axes.formatter.use_locale'] = True
+
 
 class Evaluator2D:
     """Evaluator of 2D Data. Loaded 3D MRI Data slices into 2D stacks of batches and
@@ -132,7 +141,7 @@ class Evaluator3D:
         avg_score = evaluator.evaluate()
     """
 
-    def __init__(self, criterion, model, patch_size, val_loader):
+    def __init__(self, criterion, model, patch_size, val_loader, out_channels=8):
         """Creates 3D evaluator object.
 
         Parameters
@@ -143,6 +152,7 @@ class Evaluator3D:
             3D UNet model implemented in UNet.
         val_loader: DataLoader
             3D Data loader.
+        out_channels: int
 
         Returns
         -------
@@ -156,7 +166,6 @@ class Evaluator3D:
         self.device = next(model.parameters()).device
         self.val_criterion = criterion
 
-        out_channels = model.out.out_channels
         sample = next(iter(val_loader))
         shape = tuple(sample['mri']['data'].shape[1:])
         self.output_shape = (val_loader.batch_size, out_channels, *shape)
@@ -295,7 +304,7 @@ class Evaluator3D:
 
         if lang=='tr':
             labels = ['Arka Plan', 'eCSF', 'Gri Cevher', 'Beyaz Cevher',
-                      'Ventriküller', 'Beyincik', 'TP',
+                      'Ventriküller', 'Beyincik', 'TaPu',
                       'Beyin Sapı']
         else:
             labels = ['Background', 'eCSF', 'Gray Matter', 'White Matter',
