@@ -89,13 +89,9 @@ Models have been implemented for the research.
 ### 3. Results
 
 <br>
-<p align="center">
-  <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_box_sdunet.png">
-</p>
-
 <div align="center">
     <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_box_sdunet.png" alt="Whisker-Box Plot of 3D SDUNet on FeTA2021 Dataset." width="400" />
-    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_cm_us.png" alt="Confusion Matrix of 3D SDUNet on FeTA2021 Dataset." width="400" />
+    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_cm_us.png" alt="Confusion Matrix of 3D SDUNet on FeTA2021 Dataset." width="400" height="300" />
 </div>
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
