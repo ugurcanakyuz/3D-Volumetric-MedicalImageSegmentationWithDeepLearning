@@ -1,7 +1,7 @@
 ![](https://img.shields.io/badge/PyTorch-1.10-green)
 ![](https://img.shields.io/badge/OpenCV-4.5-blue)
 ![](https://img.shields.io/badge/NiBabel-3.2-red)
-# 3D (Volumetric) Segmentation with deep learning models.
+# 3D (Volumetric) Medical Image Segmentation with Deep Learning
 This repository was created for machine learning research on FeTA2.1 dataset. Aim of the project is building segmentation models for volumetric segmentation of Fetal Brain MRI Images.
 
 ### 1. Data
@@ -31,8 +31,10 @@ This repository was created for machine learning research on FeTA2.1 dataset. Ai
   
 ### 2. Models
 Models have been implemented for the research. 
-- 2D UNet
 - 3D UNet
-- SDUNet3D
-- MeshNet
+- 3D SDUNet (Stacked Dilated U-Net)
+
 ### 3. Results
+
+
+<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
