@@ -93,7 +93,7 @@ Models have been implemented for the research.
 
 <div align="center">
     <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/b2.3dsdunet2.png" alt="3D SDU-Net architecture."/>
-    <p>Figure 3. 3D SDU-Net (Stacked Dilated U-Net) A new 3D Segmentation model based on [SDU-Net](https://doi.org/10.1016/j.compbiomed.2022.105891)  was developed for this research.</p>
+    Figure 3. 3D SDU-Net (Stacked Dilated U-Net) A new 3D Segmentation model based on [SDU-Net](https://doi.org/10.1016/j.compbiomed.2022.105891)  was developed for this research.
 </div>
 
 ### 3. Results
@@ -117,7 +117,7 @@ Results of models trained and tested on the FeTA2021 dataset.
 
 <div align="center">
     <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/sub-075_unet.png" alt="Segmentation outputs of 3D U-Net model." width="400" />
-    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/sub-075_sdunet.png" alt="Segmentation outputs of 3D SDU-Net model." width="400" height="349" />
+    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/sub-075_sdunet.png" alt="Segmentation outputs of 3D SDU-Net model." width="400" />
     <p>Figure 6. Segmentation outputs of 3D U-Net and 3D SDU-Net models for same fetal subject.</p>
 </div>
 
