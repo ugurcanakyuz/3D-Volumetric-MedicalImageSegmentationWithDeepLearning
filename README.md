@@ -84,14 +84,27 @@ Project Organization
 ### 2. Models
 Models have been implemented for the research. 
 - 3D UNet
-- 3D SDUNet (Stacked Dilated U-Net)
+<div align="center">
+    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/b2.3dunet.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset."/>
+</div>
+
+- 3D SDUNet (Stacked Dilated U-Net) A new 3D Segmentation model based on [SDU-Net] (https://doi.org/10.1016/j.compbiomed.2022.105891)  was developed for this research. 
+<div align="center">
+    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/b2.3dsdunet2.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset."/>
+</div>
 
 ### 3. Results
 
 <br>
 <div align="center">
+    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_box_us.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset." width="400" />
+    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_cm_us.png" alt="Confusion Matrix of 3D UNet on FeTA2021 Dataset." width="400" height="349" />
+</div>
+
+<br>
+<div align="center">
     <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_box_sdunet.png" alt="Whisker-Box Plot of 3D SDUNet on FeTA2021 Dataset." width="400" />
-    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_cm_us.png" alt="Confusion Matrix of 3D SDUNet on FeTA2021 Dataset." width="400" height="349" />
+    <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/test_cm_sdunet.png" alt="Confusion Matrix of 3D SDUNet on FeTA2021 Dataset." width="400" height="349" />
 </div>
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
