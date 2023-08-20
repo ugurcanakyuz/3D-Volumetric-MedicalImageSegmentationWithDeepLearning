@@ -88,7 +88,7 @@ Models have been implemented for the research.
     <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/b2.3dunet.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset."/>
 </div>
 
-- 3D SDUNet (Stacked Dilated U-Net) A new 3D Segmentation model based on [SDU-Net] (https://doi.org/10.1016/j.compbiomed.2022.105891)  was developed for this research. 
+- 3D SDUNet (Stacked Dilated U-Net) A new 3D Segmentation model based on [SDU-Net](https://doi.org/10.1016/j.compbiomed.2022.105891)  was developed for this research. 
 <div align="center">
     <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/b2.3dsdunet2.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset."/>
 </div>
