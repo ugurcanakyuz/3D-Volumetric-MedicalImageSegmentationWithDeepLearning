@@ -93,7 +93,7 @@ Models have been implemented for the research.
 
 <div align="center">
     <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/b2.3dsdunet2.png" alt="3D SDU-Net architecture."/>
-    Figure 3. 3D SDU-Net (Stacked Dilated U-Net) A new 3D Segmentation model based on [SDU-Net](https://doi.org/10.1016/j.compbiomed.2022.105891)  was developed for this research.
+    <p>Figure 3. 3D SDU-Net (Stacked Dilated U-Net) A new 3D Segmentation model based on <a href="https://doi.org/10.1016/j.compbiomed.2022.105891">SDU-Net</a> was developed for this research.</p>
 </div>
 
 ### 3. Results
