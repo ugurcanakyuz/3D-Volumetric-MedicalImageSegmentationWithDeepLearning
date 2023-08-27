@@ -67,7 +67,7 @@ Project Organization
 
 --------
 
-## Installation
+## Development Environment
 
 It is recommended to use virtual environment and add the 'src' folder to the virtual environment in order to run the project.
 
@@ -80,6 +80,8 @@ It is recommended to use virtual environment and add the 'src' folder to the vir
    `python3 -m pip install ipykernel`\
    `python3 -m ipykernel install --user`
 5. In order to start development environment in Windows required commands can be found in [here](dev_env/). 
+
+## Project Information
 
 ### 1. Data
 
