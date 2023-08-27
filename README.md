@@ -19,6 +19,8 @@ Project Organization
     │
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     │
+    ├── dev_env            <- Files required to start the development environment in Windows. 
+    │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
     ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
@@ -37,24 +39,47 @@ Project Organization
     ├── src                <- Source code for use in this project.
     │   ├── __init__.py    <- Makes src a Python module
     │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
+    │   ├── data           <- Scripts to download, generate or transform data
+    │   │   └── transforms
+    │   │   └── Dataset.py
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
     │   │   └── build_features.py
     │   │
     │   ├── models         <- Scripts to train models and then use trained models to make
     │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
+    │   │   └── models
+    │   │   └── Evaluator.py
+    │   │   └── Predictor.py
+    │   │   └── Trainer.py
+    │   │
+    │   ├── utils  <- Scripts to load configuration parameters from yaml files and to use common rutines of the project
+    │   │   └── Config.py
+    │   │   └── LossFunctions.py
+    │   │   └── Utils.py
     │   │
     │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
+    │       └── Tensorboard.py
+    │       └── Visualization.py
     │
     └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
 
 
 --------
+
+## Installation
+
+It is recommended to use virtual environment and add the 'src' folder to the virtual environment in order to run the project.
+
+1. To install virtualenvwrapper and create a new virtualenv [see](https://virtualenvwrapper.readthedocs.io/en/latest/install.html).
+2. Install required libraries for the project:\
+   `pip install -r requirements.txt`
+3. To add 'src' folder into virtualenv: \
+   `add2virtualenv src/`
+4. Experiments were managed in the Jupyter Notebooks. Therefore, there is need to add new virtual environment kernel to Jupyter Notebook. To add new kernel to JN:\
+   `python3 -m pip install ipykernel`\
+   `python3 -m ipykernel install --user`
+5. In order to start development environment in Windows required commands can be found in [here](dev_env/). 
 
 ### 1. Data
 
