@@ -1,0 +1,13 @@
+total_epochs=100
+batch_size=1
+patch_size=(128, 128, 128)
+SGD={'lr': 0.1, 'momentum': 0.9, 'nesterov': True}
+ES={'patience': 10, 'min_delta': 0.001}
+CLR={'base': 1e-05, 'max': 0.01, 'up': 3, 'down': 5, 'mode': 'triangular2'}
+dataset_train=Dhcp
+dataset_path_train=Data\rel3_dhcp_anat_pipeline
+dataset_val=Dhcp
+dataset_path_val=Data\rel3_dhcp_anat_pipeline
+transform_train=[RandomAffine(), RandomMotion(), RandomNoise()]
+transform_eval=None
+initial_weights=Random
