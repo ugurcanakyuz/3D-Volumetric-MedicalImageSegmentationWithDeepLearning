@@ -25,5 +25,5 @@ RUN apt-get clean && \
     apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 ### Install additional libraries
-COPY requirements2.txt /home/venv/
+COPY ../../requirements.txt /home/venv/
 RUN pip install -r /home/venv/requirements2.txt
