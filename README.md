@@ -3,7 +3,7 @@
 ![](https://img.shields.io/badge/NiBabel-4.0-red?style=plastic)
 ![](https://img.shields.io/badge/torchio-0.18-yellow?style=plastic)
 # 3D (Volumetric) Medical Image Segmentation with Deep Learning
-This GitHub repository was created for research focusing on the development of deep learning-based segmentation models for fetal brain tissue.
+This GitHub repository was created for research focusing on the development of deep learning-based segmentation models for fetal brain tissue as a part of my master's thesis project. This GitHub project serves as a guiding example for executing a small-scale research project, providing insights into data processing, training, evaluation, and systematic experiment storage.
 
 
 Project Organization
@@ -61,18 +61,20 @@ Project Organization
 
 ## Development Environment
 
-It is recommended to use virtual environment and add the 'src' folder to the virtual environment in order to run the project.
-
-1. To install virtualenvwrapper and create a new virtualenv [see](https://virtualenvwrapper.readthedocs.io/en/latest/install.html).
-2. Install required libraries for the project:\
+Utilizing a virtual environment during development is highly recommended. This practice isolates project-specific dependencies, ensuring a clean and organized development environment. Follow these steps to set up your virtual environment and integrate your 'src' folder:
+1. **Install `virtualenvwrapper` and Create a Virtual Environment:** To begin, install `virtualenvwrapper` by referring to the official documentation [see](https://virtualenvwrapper.readthedocs.io/en/latest/install.html). Then, create a new virtual environment by running the following command:
+   `mkvirtualenv your_env_name`
+2. **Install Project Dependencies:** Use the following command to install the necessary libraries for your project based on the requirements listed in requirements.txt: 
    `pip install -r requirements.txt`
-3. To add 'src' folder into virtualenv: \
+3. **Incorporate 'src' Folder into the Virtual Environment:** Add 'src' folder into virtualenv. Execute the subsequent command: 
    `add2virtualenv src/`
-4. Experiments were managed in the Jupyter Notebooks. Therefore, there is need to add new virtual environment kernel to Jupyter Notebook. To add new kernel to JN:\
+4. **Integrate Virtual Environment with Jupyter Notebooks:** Since you're managing experiments in Jupyter Notebooks, it's vital to add a new virtual environment kernel to Jupyter. Perform the following steps: \
    `python3 -m pip install ipykernel`\
    `python3 -m ipykernel install --user`
-5. In order to start development environment in Windows required commands can be found in [here](dev_env/). 
+5. (Optional) **Windows Development Environment Setup:** If you're on a Windows platform, specific instructions for initiating the development environment can be found [here](dev_env/). 
 
+
+By adhering to these refined instructions, you'll establish an efficient and organized development environment using a virtual environment, tailored to incorporate your project's 'src' folder and support Jupyter Notebook experimentation.
 ## Project Information
 
 ### 1. Data
