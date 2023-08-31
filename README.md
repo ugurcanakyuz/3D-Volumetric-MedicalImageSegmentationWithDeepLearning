@@ -96,7 +96,7 @@ By adhering to these refined instructions, you'll establish an efficient and org
 
 <br><br>
 <p align="center">
-  <img src="https://github.com/ugurcanakyuz/Thesis/blob/torchio_impl/Code/DataAnalysis/notebook_images/brain3.jpg?raw=true">
+  <img src="https://github.com/ugurcanakyuz/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/blob/ProjectStructurev1/reports/figures/mri_brain.jpeg">
 </p>
 <p align="center">Figure 1. Brain tissues. <a href="https://www.researchgate.net/profile/Ching-Cheng-Chuang/publication/224283818/figure/fig1/AS:213943978074118@1428019627889/Three-dimensional-in-vivo-MRI-T1-brain-image-In-the-simulation-the-three-dimensional.png"> Reference</a></p>
 
