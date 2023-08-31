@@ -106,7 +106,7 @@ By adhering to these refined instructions, you'll establish an efficient and org
 Models have been implemented for the research. 
 <br>
 <div align="center">
-    <img src="reports/figures/b2.3dunet.png" alt="3D U-Net architecture."/>
+    <img src="reports/figures/b2.3dunet.png" alt="3D U-Net architecture." width="400"/>
     <p>Figure 2. 3D U-Net Architecture</p>
 </div>
 
@@ -123,7 +123,7 @@ Results of models trained and tested on the FeTA2021 dataset.
 #### 3.1. Whisker-Box Plots
 <div align="center">
     <img src="reports/figures/test_box_us.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset." width="400" />
-    <img src="eports/figures/test_cm_us.png" alt="Confusion Matrix of 3D UNet on FeTA2021 Dataset." width="400" height="349" />
+    <img src="reports/figures/test_cm_us.png" alt="Confusion Matrix of 3D UNet on FeTA2021 Dataset." width="400" height="349" />
     <p>Figure 4. Whisker-Box plot (left) and Confusion Matrix (right) of 3D U-Net model.</p>
 </div>
 
