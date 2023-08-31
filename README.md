@@ -16,7 +16,7 @@ Project Organization
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
-    │ │
+    │
     ├── dev_env            <- Files required to start the development environment in Windows. 
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
