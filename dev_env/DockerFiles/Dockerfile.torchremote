@@ -1,5 +1,5 @@
 # Create a jupyter notebook image based on dockerized torch110 kernel.
-from ugurcan:pytorchkernel
+from username:pytorchkernel
 
 # Define work directory.
 WORKDIR /home/Thesis
@@ -25,13 +25,13 @@ RUN echo "export VISIBLE=now" >> /etc/profile
 EXPOSE 22 7777
 
 # Create dev user with password 'dev'
-RUN useradd -ms /bin/bash ugur
-RUN echo 'ugur:ceFetal2022' | chpasswd
+RUN useradd -ms /bin/bash username
+RUN echo 'username:123456' | chpasswd
 
 # Set UID and GID of the user in Docker to local UID and GID of the local user.
 # With this operation docker user have the same permissions with local one.
-RUN usermod -u 1009 ugur
-RUN groupmod -g 1012 ugur
+RUN usermod -u 1009 username
+RUN groupmod -g 1012 username
 
 # Upon start, run ssh daemon
 CMD ["/usr/sbin/sshd", "-D"]

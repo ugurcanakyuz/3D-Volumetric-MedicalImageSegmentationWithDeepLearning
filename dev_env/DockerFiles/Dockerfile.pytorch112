@@ -26,4 +26,4 @@ RUN apt-get clean && \
 
 ### Install additional libraries
 COPY ../../requirements.txt /home/venv/
-RUN pip install -r /home/venv/requirements2.txt
+RUN pip install -r /home/venv/requirements.txt

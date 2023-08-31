@@ -1,11 +1,5 @@
 services:
   torch110remote:
-#    image: ugurcanakyuz:torchremote
-#    container_name: torchremote
-#    user: root
-#    stdin_open: true # docker run -i
-#    tty: true        # docker run -t
-#    entrypoint: /bin/bash
     environment:
       MYUSERDATA: "${USER}"
     build:
@@ -22,5 +16,5 @@ services:
               capabilities: [gpu]
     volumes:
 #      - /tmp/:/tmp/
-      - "C:/Users/UgurcanAkyuz/Envs/:/home/Envs"
+      - "C:/Users/username/Envs/:/home/Envs"
       - "D:/Thesis/:/home/Thesis/"
