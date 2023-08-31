@@ -3,7 +3,7 @@
 ![](https://img.shields.io/badge/NiBabel-4.0-red?style=plastic)
 ![](https://img.shields.io/badge/torchio-0.18-yellow?style=plastic)
 # 3D (Volumetric) Medical Image Segmentation with Deep Learning
-This GitHub repository was created for research focusing on the development of deep learning-based segmentation models for fetal brain tissue as a part of my master's thesis project. This GitHub project serves as a guiding example for executing a small-scale research project, providing insights into data processing, training, evaluation, and systematic experiment storage.
+This GitHub repository was created as a part of my master's thesis project for research focusing on the development of deep learning-based segmentation models for fetal brain tissue. It serves as a guiding example for executing a small-scale research project, providing insights into data processing, training, evaluation, and systematic experiment storage.
 
 
 Project Organization
