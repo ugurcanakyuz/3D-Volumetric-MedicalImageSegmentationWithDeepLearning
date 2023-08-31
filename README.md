@@ -96,7 +96,7 @@ By adhering to these refined instructions, you'll establish an efficient and org
 
 <br><br>
 <p align="center">
-  <img src="reports/figures/mri_brain.jpeg">
+  <img src="reports/figures/mri_brain.jpeg"  width="400"/>
 </p>
 <p align="center">Figure 1. Brain tissues. <a href="https://www.researchgate.net/profile/Ching-Cheng-Chuang/publication/224283818/figure/fig1/AS:213943978074118@1428019627889/Three-dimensional-in-vivo-MRI-T1-brain-image-In-the-simulation-the-three-dimensional.png"> Reference</a></p>
 
@@ -106,7 +106,7 @@ By adhering to these refined instructions, you'll establish an efficient and org
 Models have been implemented for the research. 
 <br>
 <div align="center">
-    <img src="reports/figures/b2.3dunet.png" alt="3D U-Net architecture." width="400"/>
+    <img src="reports/figures/b2.3dunet.png" alt="3D U-Net architecture."/>
     <p>Figure 2. 3D U-Net Architecture</p>
 </div>
 
