@@ -1,20 +1,39 @@
 ## Development Environment
-The experimentation phase was carried out within two distinct environments: Linux Mint and Windows 11. Linux Mint was utilized as the client-side environment, while Windows 11 served as the server-side environment. The hardware specifications for the server-side setup were as follows:
 
+<p align="center">
+  <img src="../reports/figures/devenv_diagram.jpeg"/>
+</p>
+
+The experimentation phase was carried out within two distinct environments: Linux Mint and Windows 11. Linux Mint was utilized as the client-side environment, while Windows 11 served as the server-side environment. The hardware and software specifications for the server-side setup were as follows:
+
+**Hardware:**
 - Intel(R) Core(TM) i5-4670K CPU @ 3.40 GHz
 - 32 GB RAM
 - 11 GB NVIDIA GeForce GTX 1080 Ti
 
-Python modules for evaluation, training, and visualization were implemented using PyCharm, whereas Jupyter Notebook facilitated the execution of evaluation and training processes.\
-Convenient shortcuts in the form of `.bat` files were employed to streamline the initiation of the development environment. The `StartDevelopmentServers.bat` file served as an entry point, orchestrating the execution of `StartDocker.bat`, `StartJN.bat`, and `StartTensorboard.bat`.
-The specific purposes of these `.bat` files are outlined as follows:
-- `StartDocker.bat`: Initially intended to containerize the development environment via Docker, this approach was abandoned due to challenges in maintaining and updating pip packages within immutable Docker images. Furthermore, Docker offered an indirect advantage. **Although PyCharm's remote development lacked support for Windows server-side setups, Docker provided a feasible workaround. It allowed for the establishment of a connection between the Windows-based server environment and PyCharm for remote development purposes.** Consequently, the `StartDocker.bat` script was repurposed to facilitate the initiation of Docker containers. **To enable remote development in PyCharm using the Docker environment, it's necessary to update the files under the Dockerfile directory.**  
-  
+**Software:**
+- CUDA Version: 11.2
+- cuDNN Version: 8.1.1
 
-- `StartJN.bat`: This script was designed to launch Jupyter Notebook within the designated `notebooks` folder. The notebook interface was made accessible over the LAN through the address 
-  
+---
 
-- `StartTensorboard.bat`:  Executing this script triggered the initiation of TensorBoard within the `models` folder. By accessing `localhost:6006/` over the LAN, users could interact with TensorBoard and explore generated graphs.
+Python modules for evaluation, training, and visualization were implemented using PyCharm, whereas Jupyter Notebook facilitated the execution of evaluation and training processes. TensorBoard was used for real-time monitoring and analysis of training progress.
 
+Jupyter Notebook, TensorBoard, and SSH services have been launched using Docker. Jupyter Notebook and Tensorboard can be accessible via Web Browser. However, to utilize a remote interpreter and project directory, it's essential to configure a PyCharm remote connection for SSH and SFTP.
+For detailed instructions on setting up PyCharm remote development, please refer to this guide: [PyCharm Remote Development Guide](https://medium.com/@erikhallstrm/work-remotely-with-pycharm-tensorflow-and-ssh-c60564be862d)
+---
+### Recommended Configuration
+**Security Note:** For security, please update the following line in your [Dockerfile](Dockerfile.devenv) to set a secure password for the 'dev' user and don't forget to change 'token' of Jupyter Notebook in the [.env](../.env) file:\
+`RUN useradd -ms /bin/bash dev && echo 'dev:<your-secure-password>' | chpasswd`
 
-These streamlined scripts and setups collectively formed the backbone of the development environment, enabling efficient experimentation and analysis.
+**Deployment Configuration:**\
+It is recommended to set up deployment configuration as follows:
+- Root path: `/home/dev/3D-Volumetric-MedicalImageSegmentationWithDeepLearning`
+- Deployment path: `/`
+
+**SSH Configuration:**\
+To complete setup, configure your SSH settings as follows:
+- Host: `remotehost`
+- Port: `7776`
+- Username: `dev`
+- Password: `<your-secure-password>`
