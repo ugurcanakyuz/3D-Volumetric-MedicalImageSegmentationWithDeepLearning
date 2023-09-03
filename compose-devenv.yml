@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  jn:
+    build:
+      context: .
+      dockerfile: dev_env/Dockerfile.devenv
+      args:
+        - TOKEN=${JUPYTER_TOKEN}
+    ports:
+      - "7777:7777" # gdb server
+      - "8888:8888" # Jupyter Notebook Server
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    volumes:
+      - ".:/home/dev/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/"
+    command: jupyter-notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root notebooks/
+  tb:
+    build:
+      context: .
+      dockerfile: dev_env/Dockerfile.devenv
+    ports:
+      - "6006:6006" # Tensorboard Server
+    depends_on: ["jn"]
+    volumes:
+      - ".:/home/dev/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/"
+    command: tensorboard --host 0.0.0.0 --port=6006 --logdir_spec models/
+    
+  ssh:
+    build:
+      context: .
+      dockerfile: dev_env/Dockerfile.devenv
+    ports:
+      - "7776:22" # ssh
+    depends_on: ["jn"]
+    volumes:
+      - ".:/home/dev/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/"
+    command: /usr/sbin/sshd -D
+    
