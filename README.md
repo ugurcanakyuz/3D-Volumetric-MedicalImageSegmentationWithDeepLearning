@@ -74,7 +74,7 @@ For an efficient and organized development process, it is recommended utilizing 
 2. Access Jupyter Notebook and Tensorboard via the following URLs:\
    - Jupyter Notebook: `http://<hostadress>:8888/`
    - Tensorboard: `http://<hostadress>:6006/`
-5. (Optional) For more detailed information on setting up a remote development environment, refer to our documentation [here](dev_env/). 
+5. (Optional) For more detailed information on setting up a remote development environment, refer to documentation [here](dev_env/). 
 
 ## Project Information
 
