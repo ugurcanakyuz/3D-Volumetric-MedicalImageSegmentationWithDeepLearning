@@ -26,3 +26,6 @@ RUN jupyter notebook --generate-config
 RUN echo "c.NotebookApp.password_required = True" >> /root/.jupyter/jupyter_notebook_config.py
 RUN echo "c.NotebookApp.token = '$TOKEN'" >> /root/.jupyter/jupyter_notebook_config.py
 RUN echo "c.NotebookApp.password = '$TOKEN'" >> /root/.jupyter/jupyter_notebook_config.py
+
+# Install nbextension js and css files
+RUN jupyter contrib nbextension install --sys-prefix
