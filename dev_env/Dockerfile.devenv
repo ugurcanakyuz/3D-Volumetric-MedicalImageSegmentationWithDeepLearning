@@ -1,0 +1,28 @@
+# get our base pytorch container image from torch official docker hub repository
+FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+
+# Install SSH server
+RUN apt-get update && apt-get install -y openssh-server
+
+# Set the root password (you should use a more secure method in production)
+RUN mkdir /var/run/sshd
+RUN echo 'root:root' | chpasswd
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Create dev user with password 'dev'
+RUN useradd -ms /bin/bash dev && echo 'dev:dev' | chpasswd
+
+# Define work directory.
+WORKDIR /home/dev/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/
+
+### Install additional libraries
+COPY requirements.txt /home/dev/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/
+RUN pip install -r requirements.txt
+
+ARG TOKEN
+
+# Set jupyter notebook password
+RUN jupyter notebook --generate-config
+RUN echo "c.NotebookApp.password_required = True" >> /root/.jupyter/jupyter_notebook_config.py
+RUN echo "c.NotebookApp.token = '$TOKEN'" >> /root/.jupyter/jupyter_notebook_config.py
+RUN echo "c.NotebookApp.password = '$TOKEN'" >> /root/.jupyter/jupyter_notebook_config.py
