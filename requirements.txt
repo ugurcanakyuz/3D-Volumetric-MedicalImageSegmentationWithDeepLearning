@@ -1,18 +1,17 @@
+jupyter-contrib-nbextensions==0.7.0
 matplotlib==3.6.2
 nibabel==4.0.2
+notebook==6.4.12
 numpy==1.23.5
-numpy==1.23.3
 opencv_python==4.6.0.66
 pandas==1.5.0
 PyYAML==6.0
-PyYAML==6.0.1
 scikit_learn==1.2.0
 scipy==1.11.2
 seaborn==0.12.2
 tensorflow==2.11.0
-tensorflow_intel==2.11.0
-torch==1.12.1+cu116
+# torch==1.12.1+cu116
 torchio==0.18.84
 torchsummary==1.5.1
-torchvision==0.13.1+cu116
+# torchvision==0.13.1+cu116
 tqdm==4.64.1
