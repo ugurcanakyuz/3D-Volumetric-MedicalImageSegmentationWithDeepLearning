@@ -17,9 +17,12 @@ The experimentation phase was carried out within two distinct environments: Linu
 
 ---
 
-Python modules for evaluation, training, and visualization were implemented using PyCharm, whereas Jupyter Notebook facilitated the execution of evaluation and training processes. TensorBoard was used for real-time monitoring and analysis of training progress.\
+Python modules for evaluation, training, and visualization were implemented using PyCharm, whereas Jupyter Notebook facilitated the execution of evaluation and training processes. TensorBoard was used for real-time monitoring and analysis of training progress.
+
 Jupyter Notebook, TensorBoard, and SSH services have been launched using Docker. Jupyter Notebook and Tensorboard can be accessible via Web Browser. However, to utilize a remote interpreter and project directory, it's essential to configure a PyCharm remote connection for SSH and SFTP.
 For detailed instructions on setting up PyCharm remote development, please refer to this guide: [PyCharm Remote Development Guide](https://medium.com/@erikhallstrm/work-remotely-with-pycharm-tensorflow-and-ssh-c60564be862d)
+
+
 ---
 ### Recommended Configuration
 **Security Note:** For security, please update the following line in your [Dockerfile](Dockerfile.devenv) to set a secure password for the 'dev' user and don't forget to change 'token' of Jupyter Notebook in the [.env](../.env) file:\
