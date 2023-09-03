@@ -2,6 +2,10 @@ import glob
 import os
 import re
 
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['LD_LIBRARY_PATH'] = ''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable Tensorflow logs, it is used only for reading Tensorboard scalars.
+
 import cv2
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -9,7 +13,6 @@ import numpy as np
 import pandas as pd
 import torch
 from tensorflow.python.summary.summary_iterator import summary_iterator
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable Tensorflow logs, it is used only for reading Tensorboard scalars.
 
 
 def calculate_dice_score(pred, mask, smooth=1e-5):
@@ -333,18 +336,14 @@ def plot_sub_orient(mri, mask, pred, slice_idx=60):
         ax[2].xaxis.set_major_locator(plt.NullLocator())
 
         if i==0:
-            ax[0].set_ylabel('aksiyal')
-
-
+            ax[0].set_ylabel('Axial')
         if i==1:
-            ax[0].set_ylabel('sagital')
-
-
+            ax[0].set_ylabel('Sagittal')
         if i==2:
-            ax[0].set_ylabel('koronal')
-            ax[0].set_xlabel('MR Kesit')
-            ax[1].set_xlabel('Gerçek Maske Kesit')
-            ax[2].set_xlabel('Tahmini Maske Kesit')
+            ax[0].set_ylabel('Coronal')
+            ax[0].set_xlabel('MRI Slice')
+            ax[1].set_xlabel('Mask Slice')
+            ax[2].set_xlabel('Prediction Slice')
 
     plt.subplots_adjust(wspace=0, hspace=0.01)
     plt.show()
