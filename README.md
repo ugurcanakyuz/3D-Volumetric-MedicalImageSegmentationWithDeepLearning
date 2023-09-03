@@ -11,6 +11,8 @@ Project Organization
 
     ├── LICENSE
     ├── README.md          <- The top-level README for developers using this project.
+    ├── .env               <- Jupyter notebook token for authentication.
+    ├── compose-devenv.yml <- Configuration of development environment services.
     ├── data
     │   ├── external       <- Data from third party sources.
     │   ├── interim        <- Intermediate data that has been transformed.
@@ -61,20 +63,19 @@ Project Organization
 
 ## Development Environment
 
-Utilizing a virtual environment during development is highly recommended. This practice isolates project-specific dependencies, ensuring a clean and organized development environment. Follow these steps to set up your virtual environment and integrate your 'src' folder:
-1. **Install `virtualenvwrapper` and Create a Virtual Environment:** To begin, install `virtualenvwrapper` by referring to the official documentation [see](https://virtualenvwrapper.readthedocs.io/en/latest/install.html). Then, create a new virtual environment by running the following command:
-   `mkvirtualenv your_env_name`
-2. **Install Project Dependencies:** Use the following command to install the necessary libraries for your project based on the requirements listed in requirements.txt: 
-   `pip install -r requirements.txt`
-3. **Incorporate 'src' Folder into the Virtual Environment:** Add 'src' folder into virtualenv. Execute the subsequent command: 
-   `add2virtualenv src/`
-4. **Integrate Virtual Environment with Jupyter Notebooks:** Since you're managing experiments in Jupyter Notebooks, it's vital to add a new virtual environment kernel to Jupyter. Perform the following steps: \
-   `python3 -m pip install ipykernel`\
-   `python3 -m ipykernel install --user`
-5. (Optional) **Windows Development Environment Setup:** If you're on a Windows platform, specific instructions for initiating the development environment can be found [here](dev_env/). 
+For an efficient and organized development process, it is recommended utilizing Docker. This practice isolates project-specific dependencies, ensuring a clean and organized development environment. Follow these steps to set up your Docker environment and integrate your `src` folder:
 
+**Prerequisites:**
+- Docker version 20.10.17, build 100c701
 
-By adhering to these refined instructions, you'll establish an efficient and organized development environment using a virtual environment, tailored to incorporate your project's 'src' folder and support Jupyter Notebook experimentation.
+**Getting Started with the Development Environment:**
+1. Open your command line within the project folder and execute the following command. This will initiate Jupyter Notebook, Tensorboard, and SSH services: \
+  `docker-compose -f compose-devenv.yml up --build`
+2. Access Jupyter Notebook and Tensorboard via the following URLs:\
+   - Jupyter Notebook: `http://<hostadress>:8888/`
+   - Tensorboard: `http://<hostadress>:6006/`
+5. (Optional) For more detailed information on setting up a remote development environment, refer to our documentation [here](dev_env/). 
+
 ## Project Information
 
 ### 1. Data
