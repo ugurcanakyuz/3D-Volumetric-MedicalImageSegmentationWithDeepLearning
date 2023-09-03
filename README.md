@@ -72,7 +72,8 @@ For an efficient and organized development process, it is recommended utilizing 
 1. **Initialization:** Open your command line within the project folder and execute the following command. This will initiate Jupyter Notebook, Tensorboard, and SSH services: \
   `docker-compose -f compose-devenv.yml up --build`
 2. **Accessing the Services:** Access Jupyter Notebook and Tensorboard via the following URLs:
-   - Jupyter Notebook: `http://<hostadress>:8888/`
+   - Jupyter Notebook: `http://<hostadress>:8888/`\
+     **Note:** Codefolding, Collapsible Headings, and other options can be enabled in the Nbextensions tab.
    - Tensorboard: `http://<hostadress>:6006/`
 3. **Security Note:** Default token for the Jupyter Notebook is in the [.env](.env) file. For security, please update the [token](.env).
 4. **Remote Configuration** For more detailed information on setting up a remote development environment, refer to documentation [here](dev_env/). 
