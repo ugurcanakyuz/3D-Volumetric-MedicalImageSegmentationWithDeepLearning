@@ -7,6 +7,7 @@ services:
       dockerfile: dev_env/Dockerfile.devenv
       args:
         - TOKEN=${JUPYTER_TOKEN}
+    shm_size: '64g'
     ports:
       - "7777:7777" # gdb server
       - "8888:8888" # Jupyter Notebook Server
@@ -23,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: dev_env/Dockerfile.devenv
+    shm_size: '4g'
     ports:
       - "6006:6006" # Tensorboard Server
     depends_on: ["jn"]
@@ -34,6 +36,7 @@ services:
     build:
       context: .
       dockerfile: dev_env/Dockerfile.devenv
+    shm_size: '64g'
     ports:
       - "7776:22" # ssh
     depends_on: ["jn"]
