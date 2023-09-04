@@ -125,15 +125,15 @@ Results of models trained and tested on the FeTA2021 dataset.
 <br>
 #### 3.1. Whisker-Box Plots
 <div align="center">
-    <img src="reports/figures/test_box_us.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset." width="400" />
-    <img src="reports/figures/test_cm_us.png" alt="Confusion Matrix of 3D UNet on FeTA2021 Dataset." width="400" height="349" />
+    <img src="reports/figures/test_box_us.png" alt="Whisker-Box Plot of 3D UNet on FeTA2021 Dataset." width="400"  height="363" />
+    <img src="reports/figures/test_cm_us.png" alt="Confusion Matrix of 3D UNet on FeTA2021 Dataset." width="400"  height="363"  />
     <p>Figure 4. Whisker-Box plot (left) and Confusion Matrix (right) of 3D U-Net model.</p>
 </div>
 
 <br>
 <div align="center">
-    <img src="reports/figures/test_box_sdunet.png" alt="Whisker-Box Plot of 3D SDUNet on FeTA2021 Dataset." width="400" />
-    <img src="reports/figures/test_cm_sdunet.png" alt="Confusion Matrix of 3D SDUNet on FeTA2021 Dataset." width="400" height="349" />
+    <img src="reports/figures/test_box_sdunet.png" alt="Whisker-Box Plot of 3D SDUNet on FeTA2021 Dataset." width="400"  height="363" />
+    <img src="reports/figures/test_cm_sdunet.png" alt="Confusion Matrix of 3D SDUNet on FeTA2021 Dataset." width="400" height="363" />
     <p>Figure 5. Whisker-Box plot (left) and Confusion Matrix (right) of 3D SDU-Net model.</p>
 </div>
 
@@ -142,7 +142,7 @@ Results of models trained and tested on the FeTA2021 dataset.
 <div align="center">
     <img src="reports/figures/sub-075_unet.png" alt="Segmentation outputs of 3D U-Net model." width="400" />
     <img src="reports/figures/sub-075_sdunet.png" alt="Segmentation outputs of 3D SDU-Net model." width="400" />
-    <p>Figure 6. Segmentation outputs of 3D U-Net and 3D SDU-Net models for same fetal subject.</p>
+    <p>Figure 6. Segmentation outputs of 3D U-Net (left) and 3D SDU-Net (right) models for same fetal subject.</p>
 </div>
 
 <br><br><br>
