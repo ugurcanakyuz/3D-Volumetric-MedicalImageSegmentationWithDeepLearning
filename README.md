@@ -9,9 +9,9 @@ This repository was created as part of my master's thesis project, focused on de
 
 - **Exploratory Data Analysis Notebook:** An example notebook for exploring fetal brain MR images and masks.
 
-- **MRI Data Viewer**: A custom-built MRI data viewer implemented from scratch.
+- **MRI Data Viewer**: A custom MRI viewer implemented from scratch for use in Jupyter Notebook.
 
-- **MR Image Processing with Torchio Library:** Demonstrates MR image processing using the Torchio library.
+- **MR Image Processing with Torchio Library:** MR image processing techniques using the Torchio library.
 
 - **Data Augmentations for MR Images:** Techniques for augmenting MR images using the Torchio library.
 
