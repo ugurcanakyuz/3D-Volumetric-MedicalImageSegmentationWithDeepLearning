@@ -11,7 +11,7 @@ class NestedNamespace(SimpleNamespace):
 
     Notes
     -----
-    Implemented from https://stackoverflow.com/a/54332748/13080899 .
+    Implemented from https://stackoverflow.com/a/54332748/13080899.
 
     Parameters
     ----------
@@ -64,7 +64,6 @@ class Config(NestedNamespace):
     config = Config()
     print(config.a)  # Output: 1
     print(config.b.c)  # Output: 2
-    ```
     """
 
     def __init__(self, path="config.yaml", **kwargs):
@@ -77,7 +76,6 @@ class Config(NestedNamespace):
         **kwargs
             Additional keyword arguments to pass to the base class `NestedNamespace`.
         """
-
         with open(path, "r") as stream:
             try:
                 config = yaml.safe_load(stream)
@@ -85,3 +83,14 @@ class Config(NestedNamespace):
                 print(exc)
 
         super().__init__(config)
+
+    def as_dict(self):
+        """Convert the configuration object to a dictionary."""
+
+        def convert_to_dict(obj):
+            if isinstance(obj, NestedNamespace):
+                return {key: convert_to_dict(value) for key, value in obj.__dict__.items()}
+            else:
+                return obj
+
+        return convert_to_dict(self)
