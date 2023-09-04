@@ -257,11 +257,11 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
 
     fig = plt.figure(figsize=fig_size)
     fig.add_subplot(1, 3, 1)
-    plt.xlabel("a) MR Kesit")
+    plt.xlabel("MRI Slice")
     plt.imshow(np.rot90(image), cmap='gray')
     fig.add_subplot(1, 3, 2)
     plt.imshow(np.rot90(mask_rgb), cmap='jet')
-    plt.xlabel("b) Gerçek Maske Kesit")
+    plt.xlabel("Mask Slice")
 
     try:
         if torch.any(pred_mask):
@@ -270,7 +270,7 @@ def plot_sub(image, mask, pred_mask=None, fig_size=(13, 13)):
 
             fig.add_subplot(1, 3, 3)
             plt.imshow(np.rot90(pred_mask_rgb))
-            plt.xlabel("c) Tahmini Maske Kesit")
+            plt.xlabel("Prediction Slice")
     except TypeError:
         if np.any(pred_mask):
             fig.add_subplot(1, 3, 3)
