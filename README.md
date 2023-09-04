@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/PyTorch-1.12-green?style=plastic)
+![](https://img.shields.io/badge/PyTorch-1.13-green?style=plastic)
 ![](https://img.shields.io/badge/OpenCV-4.6-blue?style=plastic)
 ![](https://img.shields.io/badge/NiBabel-4.0-red?style=plastic)
 ![](https://img.shields.io/badge/torchio-0.18-yellow?style=plastic)
