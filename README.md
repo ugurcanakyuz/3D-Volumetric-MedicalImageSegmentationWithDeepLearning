@@ -3,8 +3,29 @@
 ![](https://img.shields.io/badge/NiBabel-4.0-red?style=plastic)
 ![](https://img.shields.io/badge/torchio-0.18-yellow?style=plastic)
 # 3D (Volumetric) Medical Image Segmentation with Deep Learning
-This GitHub repository was created as a part of my master's thesis project for research focusing on the development of deep learning-based segmentation models for fetal brain tissue. It serves as a guiding example for executing a small-scale research project, providing insights into data processing, training, evaluation, and systematic experiment storage.
+This repository was created as part of my master's thesis project, focused on developing deep learning-based segmentation models for fetal brain tissue. It provides a practical example for executing a small-scale research project, covering various aspects, including 3D data processing, training, evaluation, and organized experiment management.
 
+**Contents of the Repository:**
+
+- **Exploratory Data Analysis Notebook:** An example notebook for exploring fetal brain MR images and masks.
+
+- **MRI Data Viewer**: A custom-built MRI data viewer implemented from scratch.
+
+- **MR Image Processing with Torchio Library:** Demonstrates MR image processing using the Torchio library.
+
+- **Data Augmentations for MR Images:** Techniques for augmenting MR images using the Torchio library.
+
+- **PyTorch-Based Training and Evaluation Setup:** Practical implementation of training and evaluation processes with PyTorch.
+
+- **Tensorboard Performance Metrics Visualization:** Visualize performance metrics using Tensorboard.
+
+- **Model Evaluation Notebooks:** Dedicated notebooks for model evaluation.
+
+- **Dockerized Experiment Setup:** Simplified experiment setup with Docker.
+
+- **Additional Segmentation Training Methods:** Supplementary methods for deep learning-based segmentation.
+
+This repository provides a helpful resource for fetal brain tissue and 3D data segmentation. Contributions, questions, and feedback are welcome.
 
 Project Organization
 ------------
