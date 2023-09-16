@@ -97,6 +97,12 @@ For an efficient and organized development process, it is recommended utilizing 
 3. **Security Note:** Default token for the Jupyter Notebook is in the [.env](.env) file. For security, please update the [token](.env).
 4. **Remote Configuration** For more detailed information on setting up a remote development environment, refer to documentation [here](dev_env/). 
 
+### Models
+Due to the large file size it is recommended to download the weight files separately using the link below:
+
+[Download Model Weight Files](https://drive.google.com/file/d/1CalpFNDXWAxQJTqirXSgYVg5B-xbmvL8/view?usp=drive_link).
+
+
 ## Project Information
 
 ### 1. Data
