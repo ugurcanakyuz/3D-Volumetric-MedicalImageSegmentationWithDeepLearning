@@ -8,22 +8,14 @@ This repository was created as part of my master's thesis project, focused on de
 **Contents of the Repository:**
 
 - **Exploratory Data Analysis Notebook:** An example notebook for exploring fetal brain MR images and masks. Link of the [notebook](notebooks/DataAnalysis/ExploratoryDataAnalysis_FeTAv2.1.ipynb).
-
 - **MRI Data Viewer**: A custom MRI viewer implemented from scratch for use in Jupyter Notebook. Link of the [notebook](notebooks/DataAnalysis/MRIVisualizer.ipynb). 
   - **Note:** Nbextensions must be enabled to view MRIs and masks in the notebook.
-
 - **MR Image Processing with Torchio Library:** MR image processing techniques using the Torchio library. Link of the [notebook](notebooks/ModuleTests/TorchioAugmentationTest.ipynb).
-
 - **Data Augmentations for MR Images:** Techniques for augmenting MR images using the Torchio library. Link of the [notebook](notebooks/ModuleTests/TorchioAugmentationTest.ipynb).
-
 - **PyTorch-Based Training and Evaluation Setup:** Practical implementation of training and evaluation processes with PyTorch. Link of the [notebook](notebooks/ModelTraining3D.ipynb).
-
 - **Tensorboard Performance Metrics Visualization:** Visualize performance metrics using Tensorboard.
-
 - **Model Evaluation Notebooks:** Dedicated notebooks for model evaluation. Link of the [notebooks](notebooks/Evaluations).
-
 - **Dockerized Experiment Setup:** Simplified experiment setup with Docker. Link of the dokcer [file](dev_env/Dockerfile.devenv).
-
 - **Additional Segmentation Training Methods:** Supplementary methods for deep learning-based segmentation.
 
 This repository provides a helpful resource for fetal brain tissue and 3D data segmentation. Contributions, questions, and feedback are welcome.
