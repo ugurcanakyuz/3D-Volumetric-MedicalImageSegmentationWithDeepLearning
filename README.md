@@ -7,21 +7,22 @@ This repository was created as part of my master's thesis project, focused on de
 
 **Contents of the Repository:**
 
-- **Exploratory Data Analysis Notebook:** An example notebook for exploring fetal brain MR images and masks.
+- **Exploratory Data Analysis Notebook:** An example notebook for exploring fetal brain MR images and masks. Link of the [notebook](notebooks/DataAnalysis/ExploratoryDataAnalysis_FeTAv2.1.ipynb).
 
-- **MRI Data Viewer**: A custom MRI viewer implemented from scratch for use in Jupyter Notebook.
+- **MRI Data Viewer**: A custom MRI viewer implemented from scratch for use in Jupyter Notebook. Link of the [notebook](notebooks/DataAnalysis/MRIVisualizer.ipynb). 
+  - **Note:** Nbextensions must be enabled to view MRIs and masks in the notebook.
 
-- **MR Image Processing with Torchio Library:** MR image processing techniques using the Torchio library.
+- **MR Image Processing with Torchio Library:** MR image processing techniques using the Torchio library. Link of the [notebook](notebooks/ModuleTests/TorchioAugmentationTest.ipynb).
 
-- **Data Augmentations for MR Images:** Techniques for augmenting MR images using the Torchio library.
+- **Data Augmentations for MR Images:** Techniques for augmenting MR images using the Torchio library. Link of the [notebook](notebooks/ModuleTests/TorchioAugmentationTest.ipynb).
 
-- **PyTorch-Based Training and Evaluation Setup:** Practical implementation of training and evaluation processes with PyTorch.
+- **PyTorch-Based Training and Evaluation Setup:** Practical implementation of training and evaluation processes with PyTorch. Link of the [notebook](notebooks/ModelTraining3D.ipynb).
 
 - **Tensorboard Performance Metrics Visualization:** Visualize performance metrics using Tensorboard.
 
-- **Model Evaluation Notebooks:** Dedicated notebooks for model evaluation.
+- **Model Evaluation Notebooks:** Dedicated notebooks for model evaluation. Link of the [notebooks](notebooks/Evaluations).
 
-- **Dockerized Experiment Setup:** Simplified experiment setup with Docker.
+- **Dockerized Experiment Setup:** Simplified experiment setup with Docker. Link of the dokcer [file](dev_env/Dockerfile.devenv).
 
 - **Additional Segmentation Training Methods:** Supplementary methods for deep learning-based segmentation.
 
@@ -39,6 +40,11 @@ Project Organization
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
+    │     └── feta_2.1     <- Dataset folder.
+    │        └── sub-001   <- Subject folder.
+    │        └── sub-002
+    │          └── sub-002_rec-mial_T2w.nii.gz    <- MRI file.
+    │          └── sub-002_rec-mial_dseg.nii.gz   <- Mask file.
     │
     ├── dev_env            <- Files required to start the development environment in Windows. 
     │
@@ -93,9 +99,9 @@ For an efficient and organized development process, it is recommended utilizing 
 1. **Initialization:** Open your command line within the project folder and execute the following command. This will initiate Jupyter Notebook, Tensorboard, and SSH services: \
   `docker-compose -f compose-devenv.yml up --build`
 2. **Accessing the Services:** Access Jupyter Notebook and Tensorboard via the following URLs:
-   - Jupyter Notebook: `http://<hostadress>:8888/`\
+   - Jupyter Notebook: `http://<localhost or remotehost>:8888/`\
      **Note:** Codefolding, Collapsible Headings, and other options can be enabled in the Nbextensions tab.
-   - Tensorboard: `http://<hostadress>:6006/`
+   - Tensorboard: `http://<localhost or remotehost>:6006/`
 3. **Security Note:** Default token for the Jupyter Notebook is in the [.env](.env) file. For security, please update the [token](.env).
 4. **Remote Configuration** For more detailed information on setting up a remote development environment, refer to documentation [here](dev_env/). 
 
