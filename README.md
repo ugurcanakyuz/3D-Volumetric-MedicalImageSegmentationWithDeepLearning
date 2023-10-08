@@ -92,6 +92,7 @@ For an efficient and organized development process, it is recommended utilizing 
   `docker-compose -f compose-devenv.yml up --build`
 2. **Accessing the Services:** Access Jupyter Notebook and Tensorboard via the following URLs:
    - Jupyter Notebook: `http://<localhost or remotehost>:8888/`\
+     **Warning:** If the `notebooks` directory is empty, please locate the project folder under `Users/` directory.  [Reference](https://stackoverflow.com/a/34540607).  
      **Note:** Codefolding, Collapsible Headings, and other options can be enabled in the Nbextensions tab.
    - Tensorboard: `http://<localhost or remotehost>:6006/`
 3. **Security Note:** Default token for the Jupyter Notebook is in the [.env](.env) file. For security, please update the [token](.env).
