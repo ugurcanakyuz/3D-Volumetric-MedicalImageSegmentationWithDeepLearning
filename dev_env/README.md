@@ -40,7 +40,7 @@ To complete setup, configure your SSH settings as follows:
 - Username: `dev`
 - Password: `<your-secure-password>`
 
-The remote Python interpreter can be found at /opt/conda/bin/python3.
+The remote Python interpreter can be found at `/opt/conda/bin/python3`.
 
 **Important Note for PyCharm Users:**
 
