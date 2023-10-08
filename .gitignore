@@ -1,2 +1,2 @@
-Documents/
-Documents
+.idea
+notebooks/**.ipynb_checkpoints
