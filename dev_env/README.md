@@ -39,3 +39,10 @@ To complete setup, configure your SSH settings as follows:
 - Port: `7776`
 - Username: `dev`
 - Password: `<your-secure-password>`
+
+The remote Python interpreter can be found at /opt/conda/bin/python3.
+
+**Important Note for PyCharm Users:**
+
+If you are using PyCharm, ensure code execution by adding the following line to your Environment Variables:
+`PYTHONPATH=/home/dev/3D-Volumetric-MedicalImageSegmentationWithDeepLearning/src/`
