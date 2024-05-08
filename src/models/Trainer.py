@@ -12,7 +12,7 @@ class Trainer3D:
     """
 
     def __init__(self, criterion, model, optimizer, total_epochs, train_loader, scheduler=None):
-        """Creates 2D Trainer object.
+        """Creates 3D Trainer object.
 
         Parameters
         ----------
